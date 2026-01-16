@@ -24,7 +24,7 @@ from app.core.exceptions import AppException
 from app.api.v1.router import api_router
 
 
-from app.models import user  # noqa
+from app.models import user,product,uom,category  # noqa
 
 
 app = FastAPI(title="MyVegiz API")
