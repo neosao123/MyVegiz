@@ -1,4 +1,5 @@
 from pydantic import BaseModel, EmailStr,field_validator, Field, validator
+from fastapi import Form
 from typing import Optional
 from datetime import datetime
 import re
@@ -12,8 +13,26 @@ class UserCreate(BaseModel):
     email: EmailStr
     contact: str
     password: str
-    profile_image: Optional[str] = None
     is_admin: bool = False
+
+
+    # 
+    @classmethod
+    def as_form(
+        cls,
+        name: str = Form(...),
+        email: str = Form(...),
+        contact: str = Form(...),
+        password: str = Form(...),
+        is_admin: bool = Form(False),
+    ):
+        return cls(
+            name=name,
+            email=email,
+            contact=contact,
+            password=password,
+            is_admin=is_admin,
+        )
 
 
     # ---------- REQUIRED FIELD CHECKS (RUN FIRST) ----------
@@ -59,30 +78,6 @@ class UserCreate(BaseModel):
         if len(value) < 8:
             raise ValueError("Password must be at least 8 characters long")
         return value
-    
-
-    # ---------------- PROFILE IMAGE ----------------
-    @validator("profile_image")
-    def validate_profile_image(cls, value: Optional[str]):
-        if value is None:
-            return value
-
-        # Example: value = "image.jpg|512000"
-        # You must send size from frontend or calculate after upload
-        # Here we assume "filename|size_in_bytes"
-
-        try:
-            filename, size = value.split("|")
-            size = int(size)
-        except ValueError:
-            raise ValueError("Invalid profile image format")
-
-        max_size = 1 * 1024 * 1024  # 1 MB
-
-        if size > max_size:
-            raise ValueError("Profile image size must be less than 1 MB")
-
-        return value
 
 
 class UserResponse(BaseModel):
@@ -96,4 +91,4 @@ class UserResponse(BaseModel):
     created_at: datetime
 
     class Config:
-        orm_mode = True
+        orm_from_attributes = True

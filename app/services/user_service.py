@@ -10,7 +10,39 @@ from app.core.exceptions import AppException
 # Keep logic OUT of routes
 
 
-def create_user(db: Session, user: UserCreate):
+import cloudinary.uploader
+from fastapi import UploadFile
+
+
+MAX_IMAGE_SIZE = 1 * 1024 * 1024  # 1MB
+ALLOWED_TYPES = ["image/jpeg", "image/png", "image/jpg"]
+
+def upload_profile_image(file: UploadFile) -> str:
+    if file.content_type not in ALLOWED_TYPES:
+        raise AppException(status=400, message="Only JPG and PNG images are allowed")
+
+    contents = file.file.read()
+
+    if len(contents) > MAX_IMAGE_SIZE:
+        raise AppException(status=400, message="Profile image must be less than 1 MB")
+
+    result = cloudinary.uploader.upload(
+        contents,
+        folder="myvegiz/users",
+        resource_type="image"
+    )
+
+    return result["secure_url"]
+
+
+
+def create_user(db: Session, user: UserCreate, profile_image: UploadFile = None):
+
+
+    profile_image_url = None
+
+    if profile_image:
+        profile_image_url = upload_profile_image(profile_image)
 
     #  # Check if email already exists
     # if db.query(User).filter(User.email == user.email).first():
@@ -48,7 +80,7 @@ def create_user(db: Session, user: UserCreate):
         email=user.email,
         contact=user.contact,
         password=user.password,  # hash later
-        profile_image=user.profile_image,
+        profile_image=profile_image_url,
         is_admin=user.is_admin,
         is_active=True
     )

@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, status, UploadFile, File
 from sqlalchemy.orm import Session
 from typing import List
 
@@ -6,13 +6,17 @@ from app.api.dependencies import get_db
 from app.schemas.user import UserCreate, UserResponse
 from app.schemas.response import APIResponse
 from app.services.user_service import create_user, get_users
+from fastapi import Depends
 
 router = APIRouter()
 
 
 @router.post("/create",response_model=APIResponse[UserResponse])
-def add_user(user: UserCreate, db: Session = Depends(get_db)):
-    user = create_user(db, user)
+def add_user(user: UserCreate = Depends(UserCreate.as_form),
+             profile_image: UploadFile = File(None), 
+             db: Session = Depends(get_db)
+):
+    user = create_user(db, user, profile_image)
     return {
         "status": 201,
         "message": "User created successfully",
