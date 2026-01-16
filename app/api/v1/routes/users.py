@@ -1,26 +1,3 @@
-# from fastapi import APIRouter, Depends, status
-# from sqlalchemy.orm import Session
-# from typing import List
-
-# from app.api.dependencies import get_db
-# from app.schemas.user import UserCreate, UserResponse
-# from app.services.user_service import create_user, get_users
-
-# Handle HTTP requests
-
-# router = APIRouter()
-
-# @router.post("/create",response_model=UserResponse,status_code=status.HTTP_201_CREATED)
-# def add_user(user: UserCreate, db: Session = Depends(get_db)):
-#     return create_user(db, user)
-
-
-# @router.get("/list", response_model=List[UserResponse])
-# def list_users(db: Session = Depends(get_db)):
-#     return get_users(db)
-
-
-
 from fastapi import APIRouter, Depends, status
 from sqlalchemy.orm import Session
 from typing import List

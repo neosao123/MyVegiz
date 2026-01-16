@@ -12,9 +12,36 @@ from app.core.exceptions import AppException
 
 def create_user(db: Session, user: UserCreate):
 
-     # Check if email already exists
-    if db.query(User).filter(User.email == user.email).first():
-        raise AppException(status=400, message="Email already exists")
+    #  # Check if email already exists
+    # if db.query(User).filter(User.email == user.email).first():
+    #     raise AppException(status=400, message="Email already exists")
+
+    # Check EMAIL uniqueness (only active users)
+    email_exists = db.query(User).filter(
+        User.email == user.email,
+        User.is_delete == False,
+        User.is_active == True
+    ).first()
+
+    if email_exists:
+        raise AppException(
+            status=400,
+            message="Email already exists"
+        )
+
+    # Check CONTACT uniqueness (only active users)
+    if user.contact:
+        contact_exists = db.query(User).filter(
+            User.contact == user.contact,
+            User.is_delete == False,
+            User.is_active == True
+        ).first()
+
+        if contact_exists:
+            raise AppException(
+                status=400,
+                message="Contact number already exists"
+            )
     
     db_user = User(
         name=user.name,
@@ -22,7 +49,8 @@ def create_user(db: Session, user: UserCreate):
         contact=user.contact,
         password=user.password,  # hash later
         profile_image=user.profile_image,
-        is_admin=user.is_admin
+        is_admin=user.is_admin,
+        is_active=True
     )
 
     try:
