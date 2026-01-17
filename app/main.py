@@ -21,6 +21,8 @@ from app.api.v1.router import api_router
 
 from app.models import user,category,product,uom # noqa
 
+import app.core.cloudinary  # noqa
+
 
 
 app = FastAPI(title="MyVegiz API")
