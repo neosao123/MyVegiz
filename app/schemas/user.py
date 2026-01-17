@@ -92,3 +92,61 @@ class UserResponse(BaseModel):
 
     class Config:
         orm_from_attributes = True
+
+
+
+
+class UserUpdate(BaseModel):
+    name: Optional[str] = None
+    email: Optional[EmailStr] = None
+    contact: Optional[str] = None
+    password: Optional[str] = None
+
+    @classmethod
+    def as_form(
+        cls,
+        name: Optional[str] = Form(None),
+        email: Optional[EmailStr] = Form(None),
+        contact: Optional[str] = Form(None),
+        password: Optional[str] = Form(None),
+    ):
+        return cls(
+            name=name.strip() if name and name.strip() else None,          
+            email=email.strip() if email and email.strip() else None,  # ✅
+            contact=contact.strip() if contact and contact.strip() else None,  # ✅
+            password=password.strip() if password and password.strip() else None,  # ✅
+        )
+
+    # ---------- VALIDATIONS ----------
+    @field_validator("name")
+    @classmethod
+    def validate_name(cls, v):
+        if v is not None:
+            v = v.strip()  # ✅ Strip it first
+            if not v:
+                raise ValueError("Name is required")
+            if len(v) < 3:
+                raise ValueError("Name must be at least 3 characters long")
+        return v  # ✅ Return the stripped value
+
+
+
+    @field_validator("contact")
+    @classmethod
+    def validate_contact(cls, v):
+        if v is not None:
+            v = v.strip()  # ✅ Add this
+            if not v.isdigit():
+                raise ValueError("Contact must contain only digits")
+            if len(v) != 10:
+                raise ValueError("Contact number must be exactly 10 digits")
+        return v
+
+    @field_validator("password")
+    @classmethod
+    def validate_password(cls, v):
+        if v is not None:
+            v = v.strip()  # ✅ Add this
+            if len(v) < 8:
+                raise ValueError("Password must be at least 8 characters long")
+        return v

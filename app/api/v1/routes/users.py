@@ -8,6 +8,10 @@ from app.schemas.response import APIResponse
 from app.services.user_service import create_user, get_users
 from fastapi import Depends
 
+
+from app.schemas.user import UserUpdate 
+from app.services.user_service import update_user
+
 router = APIRouter()
 
 
@@ -41,3 +45,19 @@ def list_users(db: Session = Depends(get_db)):
         "data": users
     }
 
+
+
+@router.put("/update/{user_id}", response_model=APIResponse[UserResponse])
+def update_user_api(
+    user_id: int,
+    profile_image: UploadFile = File(None),   # ✅ FIRST
+    user: UserUpdate = Depends(UserUpdate.as_form),  # ✅ AFTER
+    db: Session = Depends(get_db)
+):
+    updated_user = update_user(db, user_id, user, profile_image)
+
+    return {
+        "status": 200,
+        "message": "User updated successfully",
+        "data": updated_user
+    }
