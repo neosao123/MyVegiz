@@ -116,7 +116,6 @@ def get_users(db: Session):
 
 
 
-
 def update_user(
     db: Session,
     user_id: int,
@@ -132,13 +131,11 @@ def update_user(
         raise AppException(status=404, message="User not found")
 
     # ---------- NAME ----------
-    # ---------- NAME ----------
-    if user_data.name and user_data.name != db_user.name:
+    if user_data.name is not None:
         db_user.name = user_data.name
 
-
     # ---------- EMAIL ----------
-    if user_data.email and user_data.email != db_user.email:
+    if user_data.email is not None:
         email_exists = db.query(User).filter(
             User.email == user_data.email,
             User.is_delete == False,
@@ -152,7 +149,7 @@ def update_user(
         db_user.email = user_data.email
 
     # ---------- CONTACT ----------
-    if user_data.contact and user_data.contact != db_user.contact:
+    if user_data.contact is not None:
         contact_exists = db.query(User).filter(
             User.contact == user_data.contact,
             User.is_delete == False,
@@ -166,7 +163,7 @@ def update_user(
         db_user.contact = user_data.contact
 
     # ---------- PASSWORD ----------
-    if user_data.password:
+    if user_data.password is not None:
         db_user.password = hash_password(user_data.password)
 
     # ---------- PROFILE IMAGE ----------
