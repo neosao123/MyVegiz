@@ -5,6 +5,7 @@ from fastapi import HTTPException, status
 from app.models.user import User
 from app.schemas.user import UserCreate
 from app.core.exceptions import AppException
+from app.core.security import hash_password
 
 # Business Logic
 # Keep logic OUT of routes
@@ -47,7 +48,9 @@ def create_user(db: Session, user: UserCreate):
         name=user.name,
         email=user.email,
         contact=user.contact,
-        password=user.password,  # hash later
+        # password=user.password,  # hash later
+        password=hash_password(user.password),
+
         profile_image=user.profile_image,
         is_admin=user.is_admin,
         is_active=True

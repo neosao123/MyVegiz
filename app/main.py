@@ -7,25 +7,20 @@ from app.admin.routes import admin_router
 # -Metadata used by:
     # Swagger UI (/docs)
     # ReDoc (/redoc)
-app = FastAPI(
-    title="MyVegiz Admin Backend",
-    version="1.0.0"
-)
-
-# include admin routes
-app.include_router(admin_router, prefix="/admin")
-
 
 
 
 from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
+from pydantic import ValidationError
+
 
 from app.core.exceptions import AppException
 from app.api.v1.router import api_router
 
 from app.models import user  # noqa
+
 
 
 app = FastAPI(title="MyVegiz API")
@@ -47,7 +42,16 @@ async def app_exception_handler(request: Request, exc: AppException):
 @app.exception_handler(RequestValidationError)
 async def validation_exception_handler(request: Request, exc: RequestValidationError):
     first_error = exc.errors()[0]
-    message = first_error.get("msg", "Validation error")
+    # message = first_error.get("msg", "Validation error")
+
+    error = exc.errors()[0]
+    field = error["loc"][-1]
+    error_type = error["type"]
+
+    if error_type == "missing":
+        message = f"{field.capitalize()} is required"
+    else:
+        message = error.get("msg", "Validation error")
 
 
     # Remove "Value error," prefix
@@ -64,8 +68,31 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
     )
 
 
+
+@app.exception_handler(ValidationError)
+async def pydantic_validation_exception_handler(
+    request: Request,
+    exc: ValidationError
+):
+    error = exc.errors()[0]
+    field = error["loc"][-1]
+    message = error.get("msg", "Validation error")
+
+    # Clean "Value error," prefix
+    if message.lower().startswith("value error"):
+        message = message.split(",", 1)[1].strip()
+
+    return JSONResponse(
+        status_code=200,
+        content={
+            "status": 400,
+            "message": message,
+            "data": None
+        }
+    )
+
+
 # Create tables (DEV only)
 # Base.metadata.create_all(bind=engine)
 
 app.include_router(api_router, prefix="/api/v1")
-
