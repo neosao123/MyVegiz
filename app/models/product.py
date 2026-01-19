@@ -13,7 +13,7 @@ class Product(Base):
         index=True
     )
     product_name = Column(String(255), nullable=False)
-    product_short_name = Column(String(255), unique=True, index=True, nullable=False)
+    product_short_name = Column(String(255), index=True, nullable=False)
     product_image = Column(String(255), nullable=True)
 
     is_active = Column(Boolean, default=True)

@@ -10,7 +10,7 @@ class UOM(Base):
     uom_code = Column(String(255),unique=True, index=True, nullable=False)
 
     uom_name = Column(String(255), nullable=False)
-    uom_short_name = Column(String(255), unique=True, index=True, nullable=False)
+    uom_short_name = Column(String(255), index=True, nullable=False)
     description = Column(String(255), nullable=True)
 
     is_active = Column(Boolean, default=True)

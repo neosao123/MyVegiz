@@ -9,7 +9,7 @@ class Category(Base):
     id = Column(Integer, primary_key=True, index=True)
     uu_id = Column(String(255), unique=True, index=True, nullable=False)
     category_name = Column(String(255), nullable=False)
-    slug = Column(String(255), unique=True, index=True, nullable=False)
+    slug = Column(String(255), index=True, nullable=False)
     category_image = Column(String(255), nullable=True)
 
     is_active = Column(Boolean, default=True)
