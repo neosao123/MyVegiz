@@ -4,7 +4,7 @@ from typing import List
 
 from app.api.dependencies import get_db
 from app.schemas.user import UserCreate, UserResponse
-from app.schemas.response import APIResponse
+from app.schemas.response import APIResponse,PaginatedAPIResponse
 from app.services.user_service import create_user, get_users
 from fastapi import Depends
 
@@ -17,6 +17,11 @@ from app.services.user_service import soft_delete_user
 from app.api.dependencies import get_current_user
 from app.models.user import User
 router = APIRouter()
+
+
+# Pagination
+from fastapi import Query
+import math
 
 
 @router.post("/create",response_model=APIResponse[UserResponse])
@@ -34,25 +39,70 @@ def add_user(
     }
 
 
-@router.get("/list",response_model=APIResponse[List[UserResponse]])
+@router.get("/list",response_model=PaginatedAPIResponse[List[UserResponse]])
 def list_users(
+    page: int = Query(1, ge=1),
+    limit: int = Query(10, ge=1),
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    users = get_users(db)
+    
+    try:
+        # -------------------------------
+        # Pagination inputs (Django style)
+        # -------------------------------
+        offset = (page - 1) * limit
 
-    if not users:
-        return {
-            "status": 200,
-            "message": "No users found",
-            "data": []
+        # -------------------------------
+        # Base filters (soft delete aware)
+        # -------------------------------
+        base_query = db.query(User).filter(
+            User.is_delete == False
+        ).order_by(User.created_at.desc())
+
+        total_records = base_query.count()
+
+        users = base_query.offset(offset).limit(limit).all()
+
+
+        # -------------------------------
+        # Pagination info
+        # -------------------------------
+        total_pages = math.ceil(total_records / limit) if limit else 1
+
+        pagination = {
+            "total": total_records,
+            "per_page": limit,
+            "current_page": page,
+            "total_pages": total_pages,
         }
 
-    return {
-        "status": 200,
-        "message": "Users fetched successfully",
-        "data": users
-    }
+        # -------------------------------
+        # Response
+        # -------------------------------
+        if users:
+            return {
+                "status": 200,
+                "message": "Users fetched successfully",
+                "data": users,
+                "pagination": pagination
+            }
+
+        return {
+            "status": 300,
+            "message": "No users found",
+            "data": [],
+            "pagination": pagination
+        }
+
+    except Exception as e:
+        return {
+            "status": 500,
+            "message": "Failed to fetch users",
+            "data": [],
+        }
+
+
 
 
 
