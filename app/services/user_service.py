@@ -173,6 +173,15 @@ def update_user(
     # ---------- PROFILE IMAGE ----------
     if profile_image:
         db_user.profile_image = upload_profile_image(profile_image)
+ 
+    
+    if user_data.is_admin is not None:
+        db_user.is_admin = user_data.is_admin
+
+    if user_data.is_active is not None:
+        db_user.is_active = user_data.is_active
+
+    
 
     db_user.is_update = True
 

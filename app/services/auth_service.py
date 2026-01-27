@@ -30,12 +30,26 @@ def login_user(db: Session, email: str, password: str):
     payload = {
         "user_id": user.id,
         "email": user.email,
+        "name":user.name,
+        "contact":user.contact,
+        "profile_image":user.profile_image
     }
 
     return {
         "access_token": create_access_token(payload),
         "refresh_token": create_refresh_token(payload),
-        "token_type": "bearer"
+        "token_type": "bearer",
+        "user": {
+            "id": user.id,
+            "uu_id":user.uu_id,
+            "email": user.email,
+            "name":user.name,
+            "contact":user.contact,
+            "profile_image":user.profile_image,
+            "is_admin":user.is_admin,
+            "is_active":user.is_active
+
+        }
     }
 
 

@@ -102,6 +102,8 @@ class UserUpdate(BaseModel):
     email: Optional[EmailStr] = None
     contact: Optional[str] = None
     password: Optional[str] = None
+    is_admin: Optional[bool] = None
+    is_active: Optional[bool] = None
 
     @classmethod
     def as_form(
@@ -110,12 +112,16 @@ class UserUpdate(BaseModel):
         email: Optional[EmailStr] = Form(None),
         contact: Optional[str] = Form(None),
         password: Optional[str] = Form(None),
+        is_admin: Optional[bool] = Form(None),   
+        is_active: Optional[bool] = Form(None),  
     ):
         return cls(
             name=name.strip() if name and name.strip() else None,          
             email=email.strip() if email and email.strip() else None,  # ✅
             contact=contact.strip() if contact and contact.strip() else None,  # ✅
             password=password.strip() if password and password.strip() else None,  # ✅
+            is_admin=is_admin,
+            is_active=is_active,
         )
 
     # ---------- VALIDATIONS ----------

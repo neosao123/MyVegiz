@@ -5,7 +5,7 @@ class LoginRequest(BaseModel):
     email: EmailStr
     password: str
 
-     # ---------- REQUIRED FIELD CHECKS (RUN FIRST) ----------
+    # ---------- REQUIRED FIELD CHECKS (RUN FIRST) ----------
     @field_validator("email", "password", mode="before")
     @classmethod
     def required_fields(cls, value, info):
@@ -21,10 +21,22 @@ class LoginRequest(BaseModel):
             raise ValueError("Password must be at least 8 characters long")
         return value
 
+# 🔹 User info to return on login
+class UserLoginData(BaseModel):
+    id: int
+    email: EmailStr
+    name: str
+    contact:str
+    profile_image:str
+    is_admin:bool
+    uu_id:str
+    is_active:bool
+
 class LoginResponse(BaseModel):
     access_token: str
     refresh_token: str
     token_type: str
+    user: UserLoginData   #  login details
 
 
 class RefreshTokenRequest(BaseModel):
