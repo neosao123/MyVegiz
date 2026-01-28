@@ -3,9 +3,10 @@ from fastapi import UploadFile
 import cloudinary.uploader
 
 from app.models.slider import Slider
-from app.schemas.slider import SliderCreate
+from app.schemas.slider import SliderCreate,SliderUpdate
 from app.core.exceptions import AppException
 
+from sqlalchemy.sql import func
 
 MAX_IMAGE_SIZE = 1 * 1024 * 1024  # 1MB
 ALLOWED_TYPES = ["image/jpeg", "image/png", "image/jpg"]
@@ -54,6 +55,89 @@ def create_slider(
     slider.web_image = upload_slider_image(web_image, "web")
 
     db.add(slider)
+    db.commit()
+    db.refresh(slider)
+
+    return slider
+
+
+
+def list_sliders(db: Session, offset: int, limit: int):
+    # -------------------------------
+    # Base filters (soft delete aware)
+    # -------------------------------
+    base_query = db.query(Slider).filter(
+        Slider.is_delete == False,
+        Slider.is_active == True
+    ).order_by(Slider.created_at.desc())
+
+    total_records = base_query.count()
+
+    sliders = base_query.offset(offset).limit(limit).all()
+
+    return total_records, sliders
+
+
+
+
+def update_slider(
+    db: Session,
+    slider_id: int,
+    data: SliderUpdate,
+    mobile_image: UploadFile = None,
+    tab_image: UploadFile = None,
+    web_image: UploadFile = None
+):
+    slider = db.query(Slider).filter(
+        Slider.id == slider_id,
+        Slider.is_delete == False
+    ).first()
+
+    if not slider:
+        raise AppException(404, "Slider not found")
+
+    # UPDATE TEXT FIELDS
+    if data.caption is not None:
+        slider.caption = data.caption
+
+    if data.is_active is not None:
+        slider.is_active = data.is_active
+
+    # UPDATE IMAGES (OPTIONAL)
+    if mobile_image and mobile_image.filename:
+        slider.mobile_image = upload_slider_image(mobile_image, "mobile")
+
+    if tab_image and tab_image.filename:
+        slider.tab_image = upload_slider_image(tab_image, "tab")
+
+    if web_image and web_image.filename:
+        slider.web_image = upload_slider_image(web_image, "web")
+
+    slider.is_update = True
+    slider.updated_at = func.now()
+
+    db.commit()
+    db.refresh(slider)
+
+    return slider
+
+
+
+
+
+def soft_delete_slider(db: Session, slider_id: int):
+    slider = db.query(Slider).filter(
+        Slider.id == slider_id,
+        Slider.is_delete == False
+    ).first()
+
+    if not slider:
+        raise AppException(404, "Slider not found")
+
+    slider.is_delete = True
+    slider.is_active = False
+    slider.deleted_at = func.now()
+
     db.commit()
     db.refresh(slider)
 
