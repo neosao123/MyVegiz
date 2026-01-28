@@ -12,7 +12,6 @@ class EmailOTP(Base):
     otp = Column(String(6), nullable=False)
 
     is_verified = Column(Boolean, default=False)
-    is_expire = Column(Boolean, default=False)
 
     expires_at = Column(DateTime(timezone=True), nullable=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now())

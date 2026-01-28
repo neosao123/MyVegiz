@@ -15,7 +15,6 @@ class Customer(Base):
     name = Column(String(255), nullable=False)
     email = Column(String(255),index=True, nullable=False)
     contact = Column(String(20), nullable=True)
-    password = Column(String(255), nullable=False)
    
     is_active = Column(Boolean, default=True)
     is_delete = Column(Boolean, default=False)
