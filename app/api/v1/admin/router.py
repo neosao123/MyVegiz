@@ -11,7 +11,8 @@ from app.api.v1.admin.routes import (
     sub_categories,
     zones,
     product_variants,
-    profile_update
+    profile_update,
+    slider
 )
 
 router = APIRouter(
@@ -30,3 +31,4 @@ router.include_router(sub_categories.router, prefix="/sub-categories")
 router.include_router(zones.router, prefix="/zone")
 router.include_router(product_variants.router, prefix="/product-variants")
 router.include_router(profile_update.router, prefix="/users", tags=["Users"])
+router.include_router(slider.router, prefix="/slider")

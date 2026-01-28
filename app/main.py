@@ -19,7 +19,7 @@ from pydantic import ValidationError
 from app.core.exceptions import AppException
 from app.api.v1.router import api_router
 
-from app.models import user,category,product,uom,token_blacklist # noqa
+from app.models import user,category,product,uom,token_blacklist,slider # noqa
 
 import app.core.cloudinary  # noqa
 from fastapi.middleware.cors import CORSMiddleware
