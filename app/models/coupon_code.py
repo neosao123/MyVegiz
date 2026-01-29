@@ -13,9 +13,12 @@ class CouponCode(Base):
 
     coupon_code = Column(String(100), unique=True, nullable=False)
 
-    flat = Column(Integer, nullable=True)          # Flat discount amount
-    percentile = Column(Integer, nullable=True)    # Percentage discount
-    cap_limit = Column(Integer, nullable=True)     # Max discount limit
+    coupon_type = Column(String(20), nullable=True)  # flat | percentile
+    disc_value = Column(Integer, nullable=True)      # flat or percent value
+
+    cap_limit = Column(Integer, nullable=True)     # only for percentile
+
+    order_value = Column(Integer, nullable=True)     # > 0
 
     termscondition = Column(String(1000), nullable=True)     # textarea
     coupon_description = Column(String(1000), nullable=True) # textarea

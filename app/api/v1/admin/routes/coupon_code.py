@@ -18,6 +18,9 @@ from app.services.coupon_code_service import get_coupon_codes_paginated
 from app.schemas.coupon_code import CouponCodeUpdate
 from app.services.coupon_code_service import update_coupon_code
 
+from app.services.coupon_code_service import soft_delete_coupon_code
+
+
 
 router = APIRouter()
 
@@ -91,4 +94,20 @@ def update_coupon_api(
         "status": 200,
         "message": "Coupon code updated successfully",
         "data": coupon
+    }
+
+
+
+@router.delete("/delete", response_model=APIResponse[CouponCodeResponse])
+def delete_coupon_code_api(
+    uu_id: str,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    deleted_coupon = soft_delete_coupon_code(db, uu_id)
+
+    return {
+        "status": 200,
+        "message": "Coupon code deleted successfully",
+        "data": deleted_coupon
     }
