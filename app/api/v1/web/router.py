@@ -1,6 +1,5 @@
 from fastapi import APIRouter
-from app.api.v1.web.routes import auth,web_categories,web_products
-from app.api.v1.web.routes import auth,web_slider
+from app.api.v1.web.routes import auth,web_categories,web_products,web_slider
 
 router = APIRouter(prefix="/web", tags=["Web"])
 

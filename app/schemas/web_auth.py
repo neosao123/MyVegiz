@@ -2,7 +2,7 @@ from pydantic import BaseModel, EmailStr, field_validator
 
 class WebRegisterRequest(BaseModel):
     name: str
-    email: EmailStr
+    # email: EmailStr
     contact: str
 
     @field_validator("name")
@@ -34,7 +34,7 @@ class CustomerResponse(BaseModel):
     id: int
     uu_id: str
     name: str
-    email: Optional[str] = None
+    # email: Optional[str] = None
     contact: Optional[str] = None
     is_active: bool
 
