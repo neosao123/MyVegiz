@@ -6,68 +6,97 @@ from app.core.exceptions import AppException
 from app.core.security import create_access_token, create_refresh_token
 
 
-def register_and_login_customer(db: Session, data):
-    
-    # Email already exists (not deleted)
-    email_exists = db.query(Customer).filter(
-        Customer.email == data.email,
-        Customer.is_delete == False
-    ).first()
+def register_customer_send_otp(db: Session, data):
+    # check email
+    # existing_email = db.query(Customer).filter(
+    #     Customer.email == data.email,
+    #     Customer.is_delete == False
+    # ).first()
 
-    if email_exists:
-        raise AppException(
-            status=400,
-            message="Email already registered"
-        )
+    # if existing_email and existing_email.is_active:
+    #     raise AppException(status=400, message="Email already exists")
 
-    # Contact already exists (not deleted)
-    contact_exists = db.query(Customer).filter(
+    # check contact
+    existing_customer = db.query(Customer).filter(
         Customer.contact == data.contact,
         Customer.is_delete == False
     ).first()
 
-    if contact_exists:
-        raise AppException(
-            status=400,
-            message="Contact number already registered"
-        )
+    # 🔴 CASE 1: ACTIVE user → BLOCK
+    if existing_customer and existing_customer.is_active:
+        raise AppException(status=400, message="Contact already exists")
 
+    # 🟡 CASE 2: INACTIVE user → RESEND OTP
+    if existing_customer and not existing_customer.is_active:
+        otp_entry = send_otp(db, data.contact)
+        return {
+            "mobile": otp_entry.mobile,
+            "message": "OTP resent successfully"
+        }
+
+    # 🟢 CASE 3: NEW user → CREATE + SEND OTP
     customer = Customer(
         uu_id=str(uuid.uuid4()),
         name=data.name,
-        email=data.email,
+        # email=data.email,
         contact=data.contact,
-        is_active=True
+        is_active=False
     )
 
     db.add(customer)
     db.commit()
+
+    otp_entry = send_otp(db, data.contact)
+
+    return {
+        "mobile": otp_entry.mobile,
+        "message": "OTP sent successfully"
+    }
+
+
+def verify_otp_and_login(db: Session, mobile: str, otp: str):
+    now = datetime.now(timezone.utc)
+
+    otp_entry = db.query(MobileOTP).filter(
+        MobileOTP.mobile == mobile,
+        MobileOTP.expires_at > now
+    ).order_by(MobileOTP.created_at.desc()).first()
+
+    if not otp_entry:
+        raise AppException(status=404, message="OTP not requested")
+
+    if otp_entry.otp != otp:
+        raise AppException(status=401, message="Invalid OTP")
+
+    # delete OTP
+    db.delete(otp_entry)
+
+    customer = db.query(Customer).filter(
+        Customer.contact == mobile,
+        Customer.is_delete == False
+    ).first()
+
+    if not customer:
+        raise AppException(status=404, message="Customer not found")
+
+    # activate customer
+    customer.is_active = True
+    db.commit()
     db.refresh(customer)
 
-    # JWT payload (same pattern as admin)
     payload = {
-        "user_id": customer.id,
-        "email": customer.email,
-        "name": customer.name,
-        "contact": customer.contact,
-        "profile_image": None
+        "customer_id": customer.id,
+        "mobile": customer.contact,
+        "type": "access"
     }
 
     return {
         "access_token": create_access_token(payload),
         "refresh_token": create_refresh_token(payload),
         "token_type": "bearer",
-        "user": {
-            "id": customer.id,
-            "email": customer.email,
-            "name": customer.name,
-            "contact": customer.contact,
-            "profile_image": None,
-            "is_admin": False,
-            "uu_id": customer.uu_id,
-            "is_active": customer.is_active
-        }
+        "customer": customer
     }
+
 
 
 from sqlalchemy.orm import Session
@@ -94,7 +123,7 @@ def send_otp(db: Session, mobile: str):
         .first()
     )
 
-    # ✅ STEP 2: If valid OTP exists → reuse it
+    #  STEP 2: If valid OTP exists → reuse it
     if existing_otp:
         return existing_otp
 

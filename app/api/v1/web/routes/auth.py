@@ -3,20 +3,37 @@ from sqlalchemy.orm import Session
 
 from app.api.dependencies import get_db
 from app.schemas.web_auth import WebRegisterRequest
-from app.services.web_auth_service import register_and_login_customer
-
+from app.services.web_auth_service import register_customer_send_otp,verify_otp_and_login
+from app.schemas.web_auth import (
+    MobileSignInRequest,
+    MobileOTPVerifyRequest,
+    OTPResponse
+)
 router = APIRouter()
 
 
 
 @router.post("/register")
 def register(payload: WebRegisterRequest, db: Session = Depends(get_db)):
-    data = register_and_login_customer(db, payload)
+    data = register_customer_send_otp(db, payload)
+    return {
+        "status": 200,
+        "message": data["message"],
+        "data": {"mobile": data["mobile"]}
+    }
+
+
+@router.post("/register/verify-otp")
+def verify_otp(payload: MobileOTPVerifyRequest, db: Session = Depends(get_db)):
+    data = verify_otp_and_login(db, payload.mobile, payload.otp)
     return {
         "status": 200,
         "message": "Login successful",
         "data": data
     }
+
+
+
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
@@ -29,7 +46,6 @@ from app.schemas.web_auth import (
 from app.services.web_auth_service import send_otp, verify_otp
 from app.schemas.response import APIResponse
 
-router = APIRouter()
 
 
 @router.post("/send-otp", response_model=APIResponse[dict])
@@ -41,7 +57,6 @@ def request_otp(payload: MobileSignInRequest, db: Session = Depends(get_db)):
         "message": "OTP sent successfully",
         "data": {
             "mobile": otp_entry.mobile,
-            "otp": otp_entry.otp  # ❗ REMOVE IN PRODUCTION
         }
     }
 
