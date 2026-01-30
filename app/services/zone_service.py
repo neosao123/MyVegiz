@@ -23,8 +23,21 @@ def create_zone(db: Session, data: ZoneCreate):
     return zone
 
 
-def get_zones(db: Session):
-    return db.query(Zone).filter(Zone.is_delete == False).all()
+
+def list_zones(db: Session, offset: int, limit: int):
+    # -------------------------------
+    # Base filters (soft delete aware)
+    # -------------------------------
+    base_query = db.query(Zone).filter(
+        Zone.is_delete == False,
+        Zone.is_active == True
+    ).order_by(Zone.created_at.desc())
+
+    total_records = base_query.count()
+
+    zones = base_query.offset(offset).limit(limit).all()
+
+    return total_records, zones
 
 
 def update_zone(db: Session, zone_id: int, data: ZoneUpdate):

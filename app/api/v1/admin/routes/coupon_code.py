@@ -47,37 +47,46 @@ def list_coupon_codes(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    offset = (page - 1) * limit
+    try:
 
-    coupons, total_records = get_coupon_codes_paginated(
-        db=db,
-        offset=offset,
-        limit=limit
-    )
+        offset = (page - 1) * limit
 
-    total_pages = math.ceil(total_records / limit) if limit else 1
+        coupons, total_records = get_coupon_codes_paginated(
+            db=db,
+            offset=offset,
+            limit=limit
+        )
 
-    pagination = {
-        "total": total_records,
-        "per_page": limit,
-        "current_page": page,
-        "total_pages": total_pages,
-    }
+        total_pages = math.ceil(total_records / limit) if limit else 1
 
-    if coupons:
+        pagination = {
+            "total": total_records,
+            "per_page": limit,
+            "current_page": page,
+            "total_pages": total_pages,
+        }
+
+        if coupons:
+            return {
+                "status": 200,
+                "message": "Coupon codes fetched successfully",
+                "data": coupons,
+                "pagination": pagination
+            }
+
         return {
-            "status": 200,
-            "message": "Coupon codes fetched successfully",
-            "data": coupons,
+            "status": 300,
+            "message": "No coupon codes found",
+            "data": [],
             "pagination": pagination
         }
 
-    return {
-        "status": 300,
-        "message": "No coupon codes found",
-        "data": [],
-        "pagination": pagination
-    }
+    except Exception:
+        return {
+            "status": 500,
+            "message": "Failed to fetch coupon codes ",
+            "data": [],
+        }
 
 
 

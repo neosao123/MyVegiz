@@ -1,10 +1,12 @@
 
 
+from itertools import product
 import uuid
 import re
 from sqlalchemy.orm import Session
 from sqlalchemy.sql import func
 from sqlalchemy.exc import IntegrityError
+from app.models.sub_category import SubCategory
 from fastapi import UploadFile
 
 from app.models.product import Product
@@ -110,13 +112,28 @@ def create_product(
         raise AppException(status=500, message="Database error while creating product")
 
 
-# ---------- LIST ----------
-def get_products(db: Session):
-    return db.query(Product).options(
-        joinedload(Product.images)
-    ).filter(
-        Product.is_delete == False
-    ).order_by(Product.created_at.desc()).all()
+# # ---------- LIST ----------
+# def get_products(db: Session):
+#     return db.query(Product).options(
+#         joinedload(Product.images)
+#     ).filter(
+#         Product.is_delete == False
+#     ).order_by(Product.created_at.desc()).all()
+
+def list_products(db: Session, offset: int, limit: int):
+    # -------------------------------
+    # Base filters (soft delete aware)
+    # -------------------------------
+    base_query = db.query(Product).filter(
+        Product.is_delete == False,
+        Product.is_active == True
+    ).order_by(Product.created_at.desc())
+
+    total_records = base_query.count()
+
+    products = base_query.offset(offset).limit(limit).all()
+
+    return total_records, products
 
 
 # ---------- UPDATE ----------
@@ -233,4 +250,32 @@ def soft_delete_product(db: Session, uu_id: str):
     db.commit()
     db.refresh(product)
     return product
+
+
+
+
+def get_sub_category_dropdown(db: Session):
+    return (
+        db.query(SubCategory)
+        .filter(
+            SubCategory.is_active == True
+        )
+        .order_by(SubCategory.sub_category_name.asc())
+        .all()
+    )
+
+
+
+
+def get_category_dropdown(db: Session):
+    return (
+        db.query(Category)
+        .filter(
+            Category.is_active == True,
+            Category.is_delete == False
+
+        )
+        .order_by(Category.category_name.asc())
+        .all()
+    )
 

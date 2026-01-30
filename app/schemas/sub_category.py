@@ -53,6 +53,7 @@ class SubCategoryResponse(BaseModel):
     id: int
     uu_id: str
     category_id: int
+    category_name:Optional[str]=None
     sub_category_name: str
     slug: str
     sub_category_image: Optional[str]
@@ -61,3 +62,12 @@ class SubCategoryResponse(BaseModel):
 
     class Config:
         orm_from_attributes = True
+
+
+class CategoryDropdownResponse(BaseModel):
+    id: int
+    category_name: str
+
+    class Config:
+        orm_from_attributes = True
+

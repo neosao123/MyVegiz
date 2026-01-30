@@ -141,3 +141,23 @@ class ProductResponse(BaseModel):
 
     class Config:
         orm_from_attributes = True
+
+
+
+class CategoryDropdownResponse(BaseModel):
+    id: int
+    category_name: str
+
+    class Config:
+        orm_from_attributes = True
+
+
+
+class SubCategoryDropdownResponse(BaseModel):
+    id: int
+    sub_category_name: str
+
+    class Config:
+        orm_from_attributes = True
+
+

@@ -18,6 +18,23 @@ from app.schemas.category import CategoryUpdate
 MAX_IMAGE_SIZE = 1 * 1024 * 1024  # 1MB
 ALLOWED_TYPES = ["image/jpeg", "image/png", "image/jpg"]
 
+def category_with_main_name_query(db):
+    return (
+        db.query(
+            Category.id,
+            Category.main_category_id,
+            MainCategory.main_category_name.label("main_category_name"),
+            Category.uu_id,
+            Category.category_name,
+            Category.slug,
+            Category.category_image,
+            Category.is_active,
+            Category.created_at,
+        )
+        .join(MainCategory, MainCategory.id == Category.main_category_id)
+        .filter(Category.is_delete == False)
+    )
+
 
 def upload_category_image(file: UploadFile) -> str:
     if file.content_type not in ALLOWED_TYPES:
@@ -92,20 +109,31 @@ def create_category(
         db.add(db_category)
         db.commit()
         db.refresh(db_category)
-        return db_category
-
+        return (
+        category_with_main_name_query(db)
+        .filter(Category.id == db_category.id)
+        .first()
+    )
     except IntegrityError:
         db.rollback()
         raise AppException(status=500, message="Database error while creating category")
 
 
 # ---------- LIST CATEGORIES ----------
-def get_categories(db: Session):
-    return db.query(Category).filter(
-        Category.is_delete == False
-    ).order_by(Category.created_at.desc()).all()
 
+def list_categories(db: Session, offset: int, limit: int):
+    # -------------------------------
+    # Base filters (soft delete aware)
+    # -------------------------------
+    base_query =category_with_main_name_query(db).filter(
+        Category.is_active == True
+    ).order_by(Category.created_at.desc())
 
+    total_records = base_query.count()
+
+    categories = base_query.offset(offset).limit(limit).all()
+
+    return total_records, categories
 
 
 
@@ -169,7 +197,12 @@ def update_category(
     try:
         db.commit()
         db.refresh(category)
-        return category
+        
+        return (
+            category_with_main_name_query(db)
+            .filter(Category.uu_id == uu_id)
+            .first()
+        )
     except IntegrityError:
         db.rollback()
         raise AppException(status=500, message="Database error while updating category")
@@ -199,7 +232,28 @@ def soft_delete_category(db: Session, uu_id: str):
     try:
         db.commit()
         db.refresh(category)
-        return category
+
+        return (
+            category_with_main_name_query(db)
+            .filter(Category.uu_id == uu_id)
+            .first()
+        ) 
     except IntegrityError:
         db.rollback()
         raise AppException(status=500, message="Database error while deleting category")
+
+
+
+
+def get_main_category_dropdown(db: Session):
+    return (
+        db.query(MainCategory)
+        .filter(
+            MainCategory.is_active == True
+        )
+        .order_by(MainCategory.main_category_name.asc())
+        .all()
+    )
+
+
+

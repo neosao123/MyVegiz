@@ -43,6 +43,7 @@ class CategoryCreate(BaseModel):
 class CategoryResponse(BaseModel):
     id: int
     main_category_id: Optional[int] = None
+    main_category_name:Optional[str]=None
     uu_id: str
     category_name: str
     slug: str
@@ -83,3 +84,13 @@ class CategoryUpdate(BaseModel):
             if len(v) < 3:
                 raise ValueError("Category name must be at least 3 characters long")
         return v
+
+
+class MainCategoryDropdownResponse(BaseModel):
+    id: int
+    main_category_name: str
+
+    class Config:
+        orm_from_attributes = True
+
+

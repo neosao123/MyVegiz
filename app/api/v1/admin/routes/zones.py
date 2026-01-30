@@ -4,7 +4,7 @@ from app.api.dependencies import get_db
 from app.schemas.zone import ZoneCreate, ZoneUpdate, ZoneResponse
 from app.services.zone_service import (
     create_zone,
-    get_zones,
+    list_zones,
     update_zone,
     delete_zone
 )
@@ -14,6 +14,8 @@ router = APIRouter()
 from app.schemas.response import APIResponse
 from app.schemas.zone import ZoneResponse
 from app.services.zone_service import get_zones_by_lat_lng
+from app.schemas.response import PaginatedAPIResponse
+import math
 
 
 @router.post("/create", response_model=APIResponse[ZoneResponse])
@@ -30,18 +32,69 @@ def create(
     }
 
 
-@router.get("/list", response_model=APIResponse[list[ZoneResponse]])
-def list_zones(
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
-):
-    zones = get_zones(db)
+# @router.get("/list", response_model=APIResponse[list[ZoneResponse]])
+# def list_zones(
+#     db: Session = Depends(get_db),
+#     current_user: User = Depends(get_current_user)
+# ):
+#     zones = get_zones(db)
 
-    return {
-        "status": 200,
-        "message": "Zones fetched successfully",
-        "data": zones
-    }
+#     return {
+#         "status": 200,
+#         "message": "Zones fetched successfully",
+#         "data": zones
+#     }
+@router.get("/list", response_model=PaginatedAPIResponse[list[ZoneResponse]])
+def list_zones_api(
+    page: int = Query(1, ge=1),
+    limit: int = Query(10, ge=1),
+    db: Session = Depends(get_db),
+    user: User = Depends(get_current_user)
+):
+    try:
+        # -------------------------------
+        # Pagination
+        # -------------------------------
+        offset = (page - 1) * limit
+
+        # -------------------------------
+        # Fetch sliders
+        # -------------------------------
+        total_records, zones = list_zones(db, offset, limit)
+
+        total_pages = math.ceil(total_records / limit) if limit else 1
+
+        pagination = {
+            "total": total_records,
+            "per_page": limit,
+            "current_page": page,
+            "total_pages": total_pages,
+        }
+
+        if zones:
+            return {
+                "status": 200,
+                "message": "zones fetched successfully",
+                "data": zones,
+                "pagination": pagination
+            }
+
+        return {
+            "status": 300,
+            "message": "No zones found",
+            "data": [],
+            "pagination": pagination
+        }
+
+    except Exception:
+        return {
+            "status": 500,
+            "message": "Failed to fetch zones",
+            "data": [],
+        }
+
+
+
 
 @router.put("/update", response_model=APIResponse[ZoneResponse])
 def update(

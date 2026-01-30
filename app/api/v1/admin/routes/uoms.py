@@ -7,7 +7,7 @@ from app.schemas.uom import UOMCreate, UOMUpdate, UOMResponse
 from app.schemas.response import APIResponse,PaginatedAPIResponse
 from app.services.uom_service import (
     create_uom,
-    get_uoms,
+    list_uoms,
     update_uom,
     soft_delete_uom
 )
@@ -37,7 +37,7 @@ def add_uom(
 
 
 @router.get("/list", response_model=PaginatedAPIResponse[List[UOMResponse]])
-def list_uoms(
+def list_uoms_api(
     page: int = Query(1, ge=1),
     limit: int = Query(10, ge=1),
     db: Session = Depends(get_db),
@@ -50,21 +50,14 @@ def list_uoms(
         offset = (page - 1) * limit
 
         # -------------------------------
-        # Base query (soft delete aware)
+        # Fetch sliders
         # -------------------------------
-        base_query = db.query(UOM).filter(
-            UOM.is_delete == False
-        ).order_by(UOM.created_at.desc())
 
-        total_records = base_query.count()
+        total_records, uoms = list_uoms(db, offset, limit)
 
-        uoms = base_query.offset(offset).limit(limit).all()
-
-        # -------------------------------
-        # Pagination metadata
-        # -------------------------------
         total_pages = math.ceil(total_records / limit) if limit else 1
 
+  
         pagination = {
             "total": total_records,
             "per_page": limit,
@@ -90,17 +83,11 @@ def list_uoms(
             "pagination": pagination
         }
 
-    except Exception as e:
+    except Exception:
         return {
             "status": 500,
-            "message": "Failed to fetch UOM list",
+            "message": "Failed to fetch UOMs",
             "data": [],
-            "pagination": {
-                "total": 0,
-                "per_page": limit,
-                "current_page": page,
-                "total_pages": 0
-            }
         }
 
 

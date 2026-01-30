@@ -6,14 +6,15 @@ from fastapi import Request
 from app.api.dependencies import get_db
 from app.schemas.category import CategoryCreate, CategoryResponse,CategoryUpdate
 from app.schemas.response import APIResponse,PaginatedAPIResponse
-from app.services.category_service import create_category, get_categories
+from app.services.category_service import create_category,soft_delete_category,update_category,list_categories,get_main_category_dropdown
 
-from app.services.category_service import update_category
-from app.services.category_service import soft_delete_category
+
 
 from app.api.dependencies import get_current_user
 from app.models.user import User
 from app.models.category import Category
+from app.schemas.category import MainCategoryDropdownResponse
+
 router = APIRouter()
 
 
@@ -41,7 +42,7 @@ def add_category(
 
 
 @router.get("/list", response_model=PaginatedAPIResponse[List[CategoryResponse]])
-def list_categories(
+def list_categories_api(
     page: int = Query(1, ge=1),
     limit: int = Query(10, ge=1),
     db: Session = Depends(get_db),
@@ -54,19 +55,10 @@ def list_categories(
         offset = (page - 1) * limit
 
         # -------------------------------
-        # Base query (soft delete aware)
+        # Fetch sliders
         # -------------------------------
-        base_query = db.query(Category).filter(
-            Category.is_delete == False
-        ).order_by(Category.created_at.desc())
+        total_records, categories = list_categories(db, offset, limit)
 
-        total_records = base_query.count()
-
-        categories = base_query.offset(offset).limit(limit).all()
-
-        # -------------------------------
-        # Pagination metadata
-        # -------------------------------
         total_pages = math.ceil(total_records / limit) if limit else 1
 
         pagination = {
@@ -94,19 +86,12 @@ def list_categories(
             "pagination": pagination
         }
 
-    except Exception as e:
+    except Exception:
         return {
             "status": 500,
             "message": "Failed to fetch categories",
             "data": [],
-            "pagination": {
-                "total": 0,
-                "per_page": limit,
-                "current_page": page,
-                "total_pages": 0
-            }
         }
-
 
 
 
@@ -154,3 +139,25 @@ def delete_category_api(
 
 
 
+@router.get(
+    "/dropdown",
+    response_model=APIResponse[List[MainCategoryDropdownResponse]]
+)
+def main_category_dropdown(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    categories = get_main_category_dropdown(db)
+
+    if not categories:
+        return {
+            "status": 300,
+            "message": "No main categories found",
+            "data": []
+        }
+
+    return {
+        "status": 200,
+        "message": "Main categories fetched successfully",
+        "data": categories
+    }

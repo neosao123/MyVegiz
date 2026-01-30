@@ -60,10 +60,21 @@ def create_uom(db: Session, uom: UOMCreate):
 
 
 # ---------- LIST ----------
-def get_uoms(db: Session):
-    return db.query(UOM).filter(
-        UOM.is_delete == False
-    ).order_by(UOM.created_at.desc()).all()
+
+def list_uoms(db: Session, offset: int, limit: int):
+    # -------------------------------
+    # Base filters (soft delete aware)
+    # -------------------------------
+    base_query = db.query(UOM).filter(
+        UOM.is_delete == False,
+        UOM.is_active == True
+    ).order_by(UOM.created_at.desc())
+
+    total_records = base_query.count()
+
+    uoms = base_query.offset(offset).limit(limit).all()
+
+    return total_records, uoms
 
 
 # ---------- UPDATE ----------

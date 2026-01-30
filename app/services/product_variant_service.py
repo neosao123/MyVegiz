@@ -7,6 +7,7 @@ from app.models.product_variants import ProductVariants
 from app.models.product import Product
 from app.models.uom import UOM
 from app.models.zone import Zone
+from app.schemas import product_variant
 from app.schemas.product_variant import ProductVariantBulkCreate
 from app.core.exceptions import AppException
 
@@ -106,20 +107,20 @@ import math
 from sqlalchemy.orm import Session
 from app.models.product_variants import ProductVariants
 
-def list_all_product_variants(
-    db: Session,
-    offset: int,
-    limit: int,
-):
+def list_all_product_variants(db: Session, offset: int, limit: int):
+    # -------------------------------
+    # Base filters (soft delete aware)
+    # -------------------------------
     base_query = db.query(ProductVariants).filter(
-        ProductVariants.is_delete == False
+        ProductVariants.is_delete == False,
+        ProductVariants.is_active == True
     ).order_by(ProductVariants.created_at.desc())
 
-    total = base_query.count()
+    total_records = base_query.count()
 
-    variants = base_query.offset(offset).limit(limit).all()
+    product_variants = base_query.offset(offset).limit(limit).all()
 
-    return variants, total
+    return total_records, product_variants
 
 from app.schemas.product_variant import VariantItem
 from app.core.exceptions import AppException

@@ -1,3 +1,4 @@
+from app.models import sub_category
 from fastapi import APIRouter, Depends, UploadFile, File, Query
 from sqlalchemy.orm import Session
 import math
@@ -15,8 +16,10 @@ from app.services.sub_category_service import (
     create_sub_category,
     list_sub_categories,
     update_sub_category,
-    soft_delete_sub_category
+    soft_delete_sub_category,
+    get_category_dropdown
 )
+from app.schemas.sub_category import CategoryDropdownResponse
 
 router = APIRouter()
 
@@ -39,20 +42,51 @@ def list_api(
     db: Session = Depends(get_db),
     user: User = Depends(get_current_user)
 ):
-    offset = (page - 1) * limit
-    total, data = list_sub_categories(db, offset, limit)
 
-    return {
-        "status": 200,
-        "message": "Fetched successfully",
-        "data": data,
-        "pagination": {
-            "total": total,
+    try:
+
+        # -------------------------------
+        # Pagination inputs (Django style)
+        # -------------------------------
+        offset = (page - 1) * limit
+
+        # -------------------------------
+        # Fetch sliders
+        # -------------------------------
+        total_records, sub_categories = list_sub_categories(db, offset, limit)
+
+        total_pages = math.ceil(total_records / limit) if limit else 1
+
+        pagination = {
+            "total": total_records,
             "per_page": limit,
             "current_page": page,
-            "total_pages": math.ceil(total / limit)
+            "total_pages": total_pages,
         }
-    }
+
+        if sub_categories:
+            return {
+                "status": 200,
+                "message": "sub categories fetched successfully",
+                "data": sub_categories,
+                "pagination": pagination
+            }
+
+        return {
+            "status": 300,
+            "message": "No sub categories found",
+            "data": [],
+            "pagination": pagination
+        }
+
+    except Exception:
+        return {
+            "status": 500,
+            "message": "Failed to fetch sub categories",
+            "data": [],
+        }
+
+
 
 
 @router.put("/update", response_model=APIResponse[SubCategoryResponse])
@@ -75,3 +109,29 @@ def delete_api(
 ):
     sub_category = soft_delete_sub_category(db, uu_id)
     return {"status": 200, "message": "Deleted successfully", "data": sub_category}
+
+
+
+
+@router.get(
+    "/dropdown",
+    response_model=APIResponse[List[CategoryDropdownResponse]]
+)
+def category_dropdown(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    categories = get_category_dropdown(db)
+
+    if not categories:
+        return {
+            "status": 300,
+            "message": "No  categories found",
+            "data": []
+        }
+
+    return {
+        "status": 200,
+        "message": "categories fetched successfully",
+        "data": categories
+    }

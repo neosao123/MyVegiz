@@ -16,12 +16,16 @@ from app.schemas.product import (
 from app.schemas.response import APIResponse,PaginatedAPIResponse
 from app.services.product_service import (
     create_product,
-    get_products,
+    list_products,
     update_product,
-    soft_delete_product
+    soft_delete_product,
+    get_category_dropdown,
+    get_sub_category_dropdown
 )
 from app.models.user import User
 from app.models.product import Product
+from app.schemas.product import CategoryDropdownResponse
+from app.schemas.product import SubCategoryDropdownResponse
 
 router = APIRouter()
 
@@ -43,7 +47,7 @@ def add_product(
 
 
 @router.get("/list", response_model=PaginatedAPIResponse[List[ProductResponse]])
-def list_products(
+def list_products_api(
     page: int = Query(1, ge=1),
     limit: int = Query(10, ge=1),
     db: Session = Depends(get_db),
@@ -56,19 +60,10 @@ def list_products(
         offset = (page - 1) * limit
 
         # -------------------------------
-        # Base query (soft delete aware)
+        # Fetch sliders
         # -------------------------------
-        base_query = db.query(Product).filter(
-            Product.is_delete == False
-        ).order_by(Product.created_at.desc())
+        total_records, products = list_products(db, offset, limit)
 
-        total_records = base_query.count()
-
-        products = base_query.offset(offset).limit(limit).all()
-
-        # -------------------------------
-        # Pagination metadata
-        # -------------------------------
         total_pages = math.ceil(total_records / limit) if limit else 1
 
         pagination = {
@@ -78,9 +73,6 @@ def list_products(
             "total_pages": total_pages,
         }
 
-        # -------------------------------
-        # Response
-        # -------------------------------
         if products:
             return {
                 "status": 200,
@@ -91,23 +83,17 @@ def list_products(
 
         return {
             "status": 300,
-            "message": "No products found",
+            "message": "No Products found",
             "data": [],
             "pagination": pagination
         }
 
-    except Exception as e:
-        return {
-            "status": 500,
-            "message": "Failed to fetch products",
-            "data": [],
-            "pagination": {
-                "total": 0,
-                "per_page": limit,
-                "current_page": page,
-                "total_pages": 0
+    except Exception:
+            return {
+                "status": 500,
+                "message": "Failed to fetch Products",
+                "data": [],
             }
-        }
 
 
 
@@ -131,3 +117,53 @@ def delete_product_api(
 ):
     data = soft_delete_product(db, uu_id)
     return {"status": 200, "message": "Product deleted successfully", "data": data}
+
+
+
+@router.get(
+    "/dropdown-category",
+    response_model=APIResponse[List[CategoryDropdownResponse]]
+)
+def category_dropdown(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    categories = get_category_dropdown(db)
+
+    if not categories:
+        return {
+            "status": 300,
+            "message": "No  categories found",
+            "data": []
+        }
+
+    return {
+        "status": 200,
+        "message": "categories fetched successfully",
+        "data": categories
+    }
+
+
+
+@router.get(
+    "/dropdown-subcategory",
+    response_model=APIResponse[List[SubCategoryDropdownResponse]]
+)
+def main_category_dropdown(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    categories = get_sub_category_dropdown(db)
+
+    if not categories:
+        return {
+            "status": 300,
+            "message": "No sub categories found",
+            "data": []
+        }
+
+    return {
+        "status": 200,
+        "message": "Sub categories fetched successfully",
+        "data": categories
+    }

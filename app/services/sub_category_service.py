@@ -1,5 +1,6 @@
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
+from app.api.v1.admin.routes import sub_categories
 from fastapi import UploadFile
 from sqlalchemy.sql import func
 import uuid
@@ -14,6 +15,23 @@ from app.core.exceptions import AppException
 
 MAX_IMAGE_SIZE = 1 * 1024 * 1024
 ALLOWED_TYPES = ["image/jpeg", "image/png", "image/jpg"]
+
+def category_with_name_query(db):
+    return (
+        db.query(
+            SubCategory.id,
+            SubCategory.category_id,
+            Category.category_name.label("category_name"),
+            SubCategory.uu_id,
+            SubCategory.sub_category_name,
+            SubCategory.slug,
+            SubCategory.sub_category_image,
+            SubCategory.is_active,
+            SubCategory.created_at,
+        )
+        .join(Category, Category.id == SubCategory.category_id)
+        .filter(SubCategory.is_delete == False)
+    )
 
 
 def upload_sub_category_image(file: UploadFile) -> str:
@@ -76,7 +94,12 @@ def create_sub_category(
         db.add(sub_category)
         db.commit()
         db.refresh(sub_category)
-        return sub_category
+        # return sub_category
+        return (
+        category_with_name_query(db)
+        .filter(SubCategory.id == sub_category.id)
+        .first()
+    )
     except IntegrityError:
         db.rollback()
         raise AppException(500, "Database error")
@@ -86,13 +109,16 @@ def create_sub_category(
 # LIST
 # =========================
 def list_sub_categories(db: Session, offset: int, limit: int):
-    query = db.query(SubCategory).filter(
-        SubCategory.is_delete == False
+    base_query = category_with_name_query(db).filter(
+        SubCategory.is_active == True
     ).order_by(SubCategory.created_at.desc())
 
-    total = query.count()
-    data = query.offset(offset).limit(limit).all()
-    return total, data
+    total_records = base_query.count()
+
+    sub_categories = base_query.offset(offset).limit(limit).all()
+
+    return total_records, sub_categories
+
 
 
 # =========================
@@ -146,9 +172,13 @@ def update_sub_category(
 
     db.commit()
     db.refresh(sub_category)
-    return sub_category
+    # return sub_category
 
-
+    return (
+        category_with_name_query(db)
+        .filter(SubCategory.uu_id == uu_id)
+        .first()
+            )
 # =========================
 # DELETE (SOFT)
 # =========================
@@ -167,4 +197,26 @@ def soft_delete_sub_category(db: Session, uu_id: str):
 
     db.commit()
     db.refresh(sub_category)
-    return sub_category
+    # return sub_category
+
+    return (
+            category_with_name_query(db)
+            .filter(sub_category.uu_id == uu_id)
+            .first()
+        ) 
+
+
+
+
+def get_category_dropdown(db: Session):
+    return (
+        db.query(Category)
+        .filter(
+            Category.is_active == True,
+            Category.is_delete == False
+
+        )
+        .order_by(Category.category_name.asc())
+        .all()
+    )
+

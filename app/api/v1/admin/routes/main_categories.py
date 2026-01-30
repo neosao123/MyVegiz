@@ -1,4 +1,5 @@
 # app/api/v1/routes/main_categories.py
+from app.models import main_category
 from fastapi import APIRouter, Depends, UploadFile, File, Query
 from sqlalchemy.orm import Session
 import math
@@ -39,20 +40,47 @@ def list_api(
     db: Session = Depends(get_db),
     user: User = Depends(get_current_user)
 ):
-    offset = (page - 1) * limit
-    total, data = list_main_categories(db, offset, limit)
+    try:
+        # -------------------------------
+        # Pagination
+        # -------------------------------
+        offset = (page - 1) * limit
 
-    return {
-        "status": 200,
-        "message": "Fetched successfully",
-        "data": data,
-        "pagination": {
-            "total": total,
-            "per_page": limit,
-            "current_page": page,
-            "total_pages": math.ceil(total / limit)
-        }
-    }
+        # -------------------------------
+        # Fetch sliders
+        # -------------------------------
+        total_records, main_categories = list_main_categories(db, offset, limit)
+
+        total_pages = math.ceil(total_records / limit) if limit else 1
+
+        pagination = {
+                "total": total_records,
+                "per_page": limit,
+                "current_page": page,
+                "total_pages": total_pages,
+            }
+
+        if main_categories:
+                return {
+                    "status": 200,
+                    "message": "main categories fetched successfully",
+                    "data": main_categories,
+                    "pagination": pagination
+                }
+
+        return {
+                "status": 300,
+                "message": "No main categories found",
+                "data": [],
+                "pagination": pagination
+            }
+
+    except Exception:
+            return {
+                "status": 500,
+                "message": "Failed to fetch sliders",
+                "data": [],
+            }
 
 
 @router.put("/update", response_model=APIResponse[MainCategoryResponse])

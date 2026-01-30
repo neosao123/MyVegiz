@@ -1,6 +1,7 @@
 # app/services/main_category_service.py
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
+from app.api.v1.admin.routes import main_categories
 from fastapi import UploadFile
 from sqlalchemy.sql import func
 import uuid
@@ -67,12 +68,20 @@ def create_main_category(
         raise AppException(500, "Database error")
 
 
-# ✅ READ (LIST)
+
 def list_main_categories(db: Session, offset: int, limit: int):
-    query = db.query(MainCategory).order_by(MainCategory.created_at.desc())
-    total = query.count()
-    data = query.offset(offset).limit(limit).all()
-    return total, data
+    # -------------------------------
+    # Base filters (soft delete aware)
+    # -------------------------------
+    base_query = db.query(MainCategory).filter(
+        MainCategory.is_active == True
+    ).order_by(MainCategory.created_at.desc())
+
+    total_records = base_query.count()
+
+    main_categories = base_query.offset(offset).limit(limit).all()
+
+    return total_records, main_categories
 
 
 # ✅ UPDATE
