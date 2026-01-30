@@ -4,14 +4,17 @@ import math
 
 from app.api.dependencies import get_db
 from app.schemas.response import PaginatedAPIResponse
-from app.schemas.web_category import CategoryResponse
-from app.services.web_category_service import list_web_categories
+from app.schemas.web_main_category import WebMainCategoryResponse
+from app.services.web_main_category_service import list_web_main_categories
 
 router = APIRouter()
 
 
-@router.get("/list",response_model=PaginatedAPIResponse[list[CategoryResponse]])
-def list_categories_web(
+@router.get(
+    "/list",
+    response_model=PaginatedAPIResponse[list[WebMainCategoryResponse]]
+)
+def list_main_categories_web(
     page: int = Query(1, ge=1),
     limit: int = Query(10, ge=1),
     db: Session = Depends(get_db),
@@ -22,7 +25,7 @@ def list_categories_web(
         # -------------------------------
         offset = (page - 1) * limit
 
-        total_records, categories = list_web_categories(
+        total_records, categories = list_web_main_categories(
             db, offset, limit
         )
 
@@ -36,19 +39,19 @@ def list_categories_web(
         }
 
         # -------------------------------
-        # Response (LIKE MAIN CATEGORY)
+        # Response (LIKE USER LIST)
         # -------------------------------
         if categories:
             return {
                 "status": 200,
-                "message": "Categories fetched successfully",
+                "message": "Main categories fetched successfully",
                 "data": categories,
                 "pagination": pagination
             }
 
         return {
             "status": 300,
-            "message": "No categories found",
+            "message": "No main categories found",
             "data": [],
             "pagination": pagination
         }
@@ -56,6 +59,6 @@ def list_categories_web(
     except Exception:
         return {
             "status": 500,
-            "message": "Failed to fetch categories",
+            "message": "Failed to fetch main categories",
             "data": []
         }
