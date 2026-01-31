@@ -14,6 +14,7 @@ router = APIRouter()
 def list_categories_web(
     page: int = Query(1, ge=1),
     limit: int = Query(10, ge=1),
+    main_category_id: int | None = Query(None),
     db: Session = Depends(get_db),
 ):
     try:
@@ -23,7 +24,7 @@ def list_categories_web(
         offset = (page - 1) * limit
 
         total_records, categories = list_web_categories(
-            db, offset, limit
+            db, offset, limit,main_category_id=main_category_id
         )
 
         total_pages = math.ceil(total_records / limit) if limit else 1
