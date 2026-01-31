@@ -112,13 +112,7 @@ def create_product(
         raise AppException(status=500, message="Database error while creating product")
 
 
-# # ---------- LIST ----------
-# def get_products(db: Session):
-#     return db.query(Product).options(
-#         joinedload(Product.images)
-#     ).filter(
-#         Product.is_delete == False
-#     ).order_by(Product.created_at.desc()).all()
+
 
 def list_products(db: Session, offset: int, limit: int):
     # -------------------------------
@@ -233,7 +227,7 @@ def update_product(
     ).filter(Product.id == product.id).first()
 
 
-# ---------- DELETE ----------
+
 def soft_delete_product(db: Session, uu_id: str):
     product = db.query(Product).filter(
         Product.uu_id == uu_id,
@@ -243,9 +237,24 @@ def soft_delete_product(db: Session, uu_id: str):
     if not product:
         raise AppException(status=404, message="Product not found")
 
+    #  SOFT DELETE PRODUCT
     product.is_delete = True
     product.is_active = False
     product.deleted_at = func.now()
+
+    #  SOFT DELETE RELATED IMAGES
+    db.query(ProductImage).filter(
+        ProductImage.product_id == product.id,
+        ProductImage.is_delete == False
+    ).update(
+        {
+            ProductImage.is_delete: True,
+            ProductImage.is_active: False,
+            ProductImage.deleted_at: func.now(),
+            ProductImage.is_update: True
+        },
+        synchronize_session=False
+    )
 
     db.commit()
     db.refresh(product)
@@ -278,4 +287,3 @@ def get_category_dropdown(db: Session):
         .order_by(Category.category_name.asc())
         .all()
     )
-

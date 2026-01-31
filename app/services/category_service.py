@@ -126,7 +126,7 @@ def list_categories(db: Session, offset: int, limit: int):
     # Base filters (soft delete aware)
     # -------------------------------
     base_query =category_with_main_name_query(db).filter(
-        Category.is_active == True
+        # Category.is_active == True
     ).order_by(Category.created_at.desc())
 
     total_records = base_query.count()

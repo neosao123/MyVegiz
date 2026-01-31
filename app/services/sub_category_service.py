@@ -110,7 +110,7 @@ def create_sub_category(
 # =========================
 def list_sub_categories(db: Session, offset: int, limit: int):
     base_query = category_with_name_query(db).filter(
-        SubCategory.is_active == True
+        # SubCategory.is_active == True
     ).order_by(SubCategory.created_at.desc())
 
     total_records = base_query.count()

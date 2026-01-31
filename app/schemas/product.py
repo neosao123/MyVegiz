@@ -9,7 +9,7 @@ import re
 
 class ProductCreate(BaseModel):
     category_id: int
-    sub_category_id: Optional[int] = None  # ❌ OPTIONAL
+    sub_category_id: Optional[int] = None  #  OPTIONAL
 
     product_name: str
     product_short_name: str
@@ -23,7 +23,7 @@ class ProductCreate(BaseModel):
     def as_form(
         cls,
         category_id: int = Form(...),
-        sub_category_id: Optional[int] = Form(None),  # 🔴 OPTIONAL
+        sub_category_id: Optional[int] = Form(None),  #  OPTIONAL
         product_name: str = Form(...),
         product_short_name: str = Form(...),
         short_description: Optional[str] = Form(None),
@@ -127,7 +127,9 @@ class ProductImageResponse(BaseModel):
 class ProductResponse(BaseModel):
     uu_id: str
     category_id: int
-    sub_category_id: Optional[int]   # 🔴 OPTIONAL
+    # category_name: str
+    sub_category_id: Optional[int]  
+    # sub_category_name: Optional[str]
     product_name: str
     product_short_name: str
     slug: str
