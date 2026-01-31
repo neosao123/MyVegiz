@@ -20,7 +20,7 @@ from app.services.product_service import (
     update_product,
     soft_delete_product,
     get_category_dropdown,
-    get_sub_category_dropdown
+    get_sub_category_dropdown_by_category_uu_id
 )
 from app.models.user import User
 from app.models.product import Product
@@ -149,13 +149,17 @@ def category_dropdown(
     "/dropdown-subcategory",
     response_model=APIResponse[List[SubCategoryDropdownResponse]]
 )
-def main_category_dropdown(
+def sub_category_dropdown(
+    category_uu_id: str = Query(..., description="Category UUID"),
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    categories = get_sub_category_dropdown(db)
+    sub_categories = get_sub_category_dropdown_by_category_uu_id(
+        db=db,
+        category_uu_id=category_uu_id
+    )
 
-    if not categories:
+    if not sub_categories:
         return {
             "status": 300,
             "message": "No sub categories found",
@@ -165,5 +169,5 @@ def main_category_dropdown(
     return {
         "status": 200,
         "message": "Sub categories fetched successfully",
-        "data": categories
+        "data": sub_categories
     }

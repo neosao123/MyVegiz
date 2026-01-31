@@ -157,6 +157,7 @@ class CategoryDropdownResponse(BaseModel):
 
 class SubCategoryDropdownResponse(BaseModel):
     id: int
+    category_id: int 
     sub_category_name: str
 
     class Config:

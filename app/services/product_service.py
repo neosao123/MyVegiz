@@ -17,7 +17,6 @@ from app.core.exceptions import AppException
 import cloudinary.uploader
 from sqlalchemy.orm import joinedload
 
-
 MAX_IMAGE_SIZE = 1 * 1024 * 1024
 ALLOWED_TYPES = ["image/jpeg", "image/png", "image/jpg"]
 
@@ -263,17 +262,15 @@ def soft_delete_product(db: Session, uu_id: str):
 
 
 
-def get_sub_category_dropdown(db: Session):
-    return (
-        db.query(SubCategory)
-        .filter(
-            SubCategory.is_active == True
-        )
-        .order_by(SubCategory.sub_category_name.asc())
-        .all()
-    )
-
-
+# def get_sub_category_dropdown(db: Session):
+#     return (
+#         db.query(SubCategory)
+#         .filter(
+#             SubCategory.is_active == True
+#         )
+#         .order_by(SubCategory.sub_category_name.asc())
+#         .all()
+#     )
 
 
 def get_category_dropdown(db: Session):
@@ -285,5 +282,42 @@ def get_category_dropdown(db: Session):
 
         )
         .order_by(Category.category_name.asc())
+        .all()
+    )
+
+
+
+from app.models.category import Category
+from app.models.sub_category import SubCategory
+from app.core.exceptions import AppException
+
+
+def get_sub_category_dropdown_by_category_uu_id(
+    db: Session,
+    category_uu_id: str
+):
+    # 1️. Find category by uu_id
+    category = db.query(Category).filter(
+        Category.uu_id == category_uu_id,
+        Category.is_delete == False,
+        Category.is_active == True
+    ).first()
+
+    if not category:
+        raise AppException(status=404, message="Category not found")
+
+    # 2️. Fetch sub-categories by category_id
+    return (
+        db.query(
+            SubCategory.id,
+            SubCategory.category_id,
+            SubCategory.sub_category_name
+        )
+        .filter(
+            SubCategory.category_id == category.id,
+            SubCategory.is_active == True,
+            SubCategory.is_delete == False
+        )
+        .order_by(SubCategory.sub_category_name.asc())
         .all()
     )
