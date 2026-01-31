@@ -56,7 +56,7 @@ def list_all_product_variants_api(
         total_pages = math.ceil(total_records / limit) if limit else 1
 
         pagination = {
-            "total": total_pages,
+            "total": total_records,
             "per_page": limit,
             "current_page": page,
             "total_pages": total_pages,
