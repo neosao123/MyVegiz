@@ -9,6 +9,7 @@ import re
 class CategoryResponse(BaseModel):
     id: int
     main_category_id: Optional[int] = None
+    main_category_name: Optional[str] = None   
     uu_id: str
     category_name: str
     slug: str
