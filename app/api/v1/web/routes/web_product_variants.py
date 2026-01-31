@@ -10,10 +10,12 @@ from app.schemas.web_product_variants import ProductVariantResponse
 
 from app.services.web_product_variants_service import list_all_product_variants
 from app.schemas.response import APIResponse, PaginatedAPIResponse
+from fastapi import HTTPException
 
 
 
 router = APIRouter()
+
 
 
 @router.get(
@@ -21,20 +23,16 @@ router = APIRouter()
     response_model=PaginatedAPIResponse[List[ProductVariantResponse]]
 )
 def list_all_product_variants_api(
-    lat: float = Query(..., description="Latitude"),
-    lng: float = Query(..., description="Longitude"),
+    lat: float = Query(...),
+    lng: float = Query(...),
     page: int = Query(1, ge=1),
     limit: int = Query(10, ge=1),
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
+    offset = (page - 1) * limit
+
     try:
-
-        offset = (page - 1) * limit
-
-        # -------------------------------
-        # Fetch sliders
-        # -------------------------------
         total_records, variants = list_all_product_variants(
             db=db,
             lat=lat,
@@ -52,25 +50,16 @@ def list_all_product_variants_api(
             "total_pages": total_pages,
         }
 
-        if variants:
-            return {
-                "status": 200,
-                "message": "Product variants fetched successfully",
-                "data": variants,
-                "pagination": pagination,
-            }
-
         return {
-            "status": 300,
-            "message": "No product variants found",
-            "data": [],
+            "status": 200,
+            "message": "Product variants fetched successfully",
+            "data": variants,
             "pagination": pagination,
         }
 
-    except Exception:
-        return {
-            "status": 500,
-            "message": "Failed to fetch product variants",
-            "data": [],
-        }
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail="Failed to fetch product variants"
+        )
 
