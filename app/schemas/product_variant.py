@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from typing import List
+from typing import List,Optional
 from datetime import datetime
 
 
@@ -11,6 +11,7 @@ class VariantItem(BaseModel):
     uom_id: int
     actual_price: float
     selling_price: float
+    is_deliverable: Optional[bool] = True
 
 
 # -------------------------
@@ -32,6 +33,7 @@ class ProductVariantResponse(BaseModel):
     uom_id: int
     actual_price: float
     selling_price: float
+    is_deliverable : bool
     is_active: bool
     created_at: datetime
 

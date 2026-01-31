@@ -78,6 +78,7 @@ def bulk_create_product_variants(
                 uom_id=item.uom_id,
                 actual_price=item.actual_price,
                 selling_price=item.selling_price,
+                is_deliverable=item.is_deliverable if item.is_deliverable is not None else True,
                 is_active=True
             )
         )
@@ -148,6 +149,9 @@ def update_product_variant(
 
     if "is_active" in data:
         variant.is_active = data["is_active"]
+
+    if "is_deliverable" in data:
+        variant.is_deliverable = data["is_deliverable"]
 
     try:
         db.commit()

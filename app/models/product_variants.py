@@ -30,6 +30,7 @@ class ProductVariants(Base):
     actual_price = Column(Float, nullable=False)
     selling_price = Column(Float, nullable=False, index=True)
 
+    is_deliverable=Column(Boolean, default=True)
 
     is_active = Column(Boolean, default=True)
     is_delete = Column(Boolean, default=False)
