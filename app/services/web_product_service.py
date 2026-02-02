@@ -8,7 +8,8 @@ def list_web_products(
     offset: int,
     limit: int,
     category_id: int = None,
-    sub_category_id: int = None
+    sub_category_id: int = None,
+    slug: str | None = None, 
 ):
     base_query = db.query(Product).options(
         joinedload(Product.images)
@@ -23,6 +24,9 @@ def list_web_products(
 
     if sub_category_id:
         base_query = base_query.filter(Product.sub_category_id == sub_category_id)
+
+    if slug:                          
+        base_query = base_query.filter(Product.slug == slug)
 
     total_records = base_query.count()
     data = base_query.offset(offset).limit(limit).all()

@@ -10,23 +10,28 @@ from app.models.product import Product
 from app.models.uom import UOM
 from app.models.category import Category
 from app.models.sub_category import SubCategory
+from app.models.main_category import MainCategory
 
 
 def product_variant_with_product_uom_query(db: Session):
     return (
         db.query(ProductVariants)
         .join(Product, Product.id == ProductVariants.product_id)
+        .join(Category, Category.id == Product.category_id)
+        .join(MainCategory, MainCategory.id == Category.main_category_id)
         .join(UOM, UOM.id == ProductVariants.uom_id)
         .options(
-            # joinedload(ProductVariants.product),
-            # joinedload(ProductVariants.uom)
             joinedload(ProductVariants.product)
-                .joinedload(Product.category),
+                .joinedload(Product.category)
+                .joinedload(Category.main_category),
             joinedload(ProductVariants.product)
                 .joinedload(Product.sub_category),
-            joinedload(ProductVariants.uom)
+            joinedload(ProductVariants.product)
+                .joinedload(Product.images),
+            joinedload(ProductVariants.uom),
         )
     )
+
 
 
 
@@ -36,6 +41,7 @@ def list_all_product_variants(
     lng: float,
     offset: int,
     limit: int,
+    main_category_slug: str | None = None,
 ):
     # ----------------------------------
     # 1. Find zones that contain the point
@@ -72,6 +78,13 @@ def list_all_product_variants(
         )
         .order_by(ProductVariants.created_at.desc())
     )
+
+    if main_category_slug:   # MAIN CATEGORY FILTER
+        base_query = base_query.filter(
+            MainCategory.slug == main_category_slug
+        )
+
+    base_query = base_query.order_by(ProductVariants.created_at.desc())
 
     total_records = base_query.count()
 

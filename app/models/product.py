@@ -48,3 +48,11 @@ class Product(Base):
 
     category = relationship("Category")
     sub_category = relationship("SubCategory")
+
+
+    @property
+    def product_image(self):
+        for img in self.images or []:
+            if img.is_primary and img.is_active and not img.is_delete:
+                return img.product_image
+        return None

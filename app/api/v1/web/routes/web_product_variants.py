@@ -27,6 +27,7 @@ def list_all_product_variants_api(
     lng: float = Query(...),
     page: int = Query(1, ge=1),
     limit: int = Query(10, ge=1),
+    main_category_slug: str | None = Query(None),
     db: Session = Depends(get_db),
     # current_user: User = Depends(get_current_user),
 ):
@@ -34,7 +35,7 @@ def list_all_product_variants_api(
 
     try:
         total_records, variants, error_message = list_all_product_variants(
-            db, lat, lng, offset, limit
+            db, lat, lng, offset, limit,main_category_slug=main_category_slug
         )
 
         if error_message:

@@ -3,6 +3,11 @@ from datetime import datetime
 from typing import Optional
 
 
+class ProductImageMiniResponse(BaseModel):
+    product_image: str
+
+    class Config:
+        orm_from_attributes = True
 
 
 
@@ -28,11 +33,23 @@ class ProductMiniResponse(BaseModel):
     product_name: str
     slug: str
 
+    product_image: Optional[str] = None  # SINGLE IMAGE
+
     category: CategoryMiniResponse
-    sub_category: Optional[SubCategoryMiniResponse] = None  #  OPTIONAL
+    sub_category: Optional[SubCategoryMiniResponse] = None
 
     class Config:
         orm_from_attributes = True
+
+    @staticmethod
+    def get_primary_image(obj):
+        if not obj.images:
+            return None
+        for img in obj.images:
+            if img.is_primary and not img.is_delete and img.is_active:
+                return img.product_image
+        return None
+
 
 
 class UOMMiniResponse(BaseModel):

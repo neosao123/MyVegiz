@@ -21,6 +21,7 @@ def list_products_web(
     limit: int = Query(10, ge=1),
     category_id: Optional[int] = Query(None),
     sub_category_id: Optional[int] = Query(None),
+    slug: Optional[str] = Query(None),
     db: Session = Depends(get_db),
 ):
     try:
@@ -34,7 +35,8 @@ def list_products_web(
             offset=offset,
             limit=limit,
             category_id=category_id,
-            sub_category_id=sub_category_id
+            sub_category_id=sub_category_id,
+            slug=slug,   
         )
 
         total_pages = math.ceil(total_records / limit) if limit else 1
