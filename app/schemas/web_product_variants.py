@@ -1,11 +1,35 @@
 from pydantic import BaseModel
 from datetime import datetime
+from typing import Optional
+
+
+
+
+
+class CategoryMiniResponse(BaseModel):
+    id: int
+    category_name: str
+
+    class Config:
+        orm_from_attributes = True
+
+
+
+class SubCategoryMiniResponse(BaseModel):
+    id: int
+    sub_category_name: str
+
+    class Config:
+        orm_from_attributes = True
 
 
 class ProductMiniResponse(BaseModel):
     id: int
     product_name: str
     slug: str
+
+    category: CategoryMiniResponse
+    sub_category: Optional[SubCategoryMiniResponse] = None  #  OPTIONAL
 
     class Config:
         orm_from_attributes = True

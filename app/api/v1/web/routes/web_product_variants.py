@@ -28,18 +28,28 @@ def list_all_product_variants_api(
     page: int = Query(1, ge=1),
     limit: int = Query(10, ge=1),
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    # current_user: User = Depends(get_current_user),
 ):
     offset = (page - 1) * limit
 
     try:
-        total_records, variants = list_all_product_variants(
-            db=db,
-            lat=lat,
-            lng=lng,
-            offset=offset,
-            limit=limit
+        total_records, variants, error_message = list_all_product_variants(
+            db, lat, lng, offset, limit
         )
+
+        if error_message:
+            return {
+                "status": 400,
+                "message": error_message,
+                "data": [],
+                "pagination": {
+                    "total": 0,
+                    "per_page": limit,
+                    "current_page": page,
+                    "total_pages": 0,
+                }
+            }
+
 
         total_pages = math.ceil(total_records / limit) if limit else 1
 
@@ -56,10 +66,17 @@ def list_all_product_variants_api(
             "data": variants,
             "pagination": pagination,
         }
-
+    
     except Exception as e:
-        raise HTTPException(
-            status_code=500,
-            detail="Failed to fetch product variants"
-        )
-
+        # Return error with status 500 inside, but HTTP 200
+        return {
+            "status": 500,
+            "message": "Failed to fetch product variants",
+            "data": [],
+            "pagination": {
+                "total": 0,
+                "per_page": limit,
+                "current_page": page,
+                "total_pages": 0,
+            }
+        }

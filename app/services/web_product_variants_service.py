@@ -8,6 +8,8 @@ from app.utils.geo import point_in_polygon
 from sqlalchemy.orm import Session, joinedload
 from app.models.product import Product
 from app.models.uom import UOM
+from app.models.category import Category
+from app.models.sub_category import SubCategory
 
 
 def product_variant_with_product_uom_query(db: Session):
@@ -16,10 +18,16 @@ def product_variant_with_product_uom_query(db: Session):
         .join(Product, Product.id == ProductVariants.product_id)
         .join(UOM, UOM.id == ProductVariants.uom_id)
         .options(
-            joinedload(ProductVariants.product),
+            # joinedload(ProductVariants.product),
+            # joinedload(ProductVariants.uom)
+            joinedload(ProductVariants.product)
+                .joinedload(Product.category),
+            joinedload(ProductVariants.product)
+                .joinedload(Product.sub_category),
             joinedload(ProductVariants.uom)
         )
     )
+
 
 
 def list_all_product_variants(
@@ -30,21 +38,27 @@ def list_all_product_variants(
     limit: int,
 ):
     # ----------------------------------
-    # 1. Geo filter (same as now)
+    # 1. Find zones that contain the point
     # ----------------------------------
     zones = db.query(Zone).filter(
         Zone.is_delete == False,
-        Zone.is_active == True,
-        Zone.is_deliverable == True
+        Zone.is_active == True
     ).all()
 
-    valid_zone_ids = [
-        z.id for z in zones
+    matching_zones = [
+        z for z in zones
         if point_in_polygon(lat, lng, z.polygon)
     ]
 
-    if not valid_zone_ids:
-        return 0, []
+    # Check if point is in any zone
+    if not matching_zones:
+        return None, None, "Location is outside our service area"
+
+    # Check if any matching zone is deliverable
+    deliverable_zone_ids = [z.id for z in matching_zones if z.is_deliverable]
+    
+    if not deliverable_zone_ids:
+        return None, None, "Delivery is not available in this area"
 
     # ----------------------------------
     # 2. Product Variants + Product + UOM
@@ -52,7 +66,7 @@ def list_all_product_variants(
     base_query = (
         product_variant_with_product_uom_query(db)
         .filter(
-            ProductVariants.zone_id.in_(valid_zone_ids),
+            ProductVariants.zone_id.in_(deliverable_zone_ids),
             ProductVariants.is_delete == False,
             ProductVariants.is_active == True
         )
@@ -68,5 +82,4 @@ def list_all_product_variants(
         .all()
     )
 
-    return total_records, variants
-
+    return total_records, variants, None
