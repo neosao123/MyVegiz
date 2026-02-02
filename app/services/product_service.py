@@ -117,10 +117,19 @@ def list_products(db: Session, offset: int, limit: int):
     # -------------------------------
     # Base filters (soft delete aware)
     # -------------------------------
-    base_query = db.query(Product).filter(
-        Product.is_delete == False,
-        Product.is_active == True
-    ).order_by(Product.created_at.desc())
+    base_query = (
+        db.query(Product)
+        .options(
+            joinedload(Product.category),
+            joinedload(Product.sub_category),
+            joinedload(Product.images)
+        )
+        .filter(
+            Product.is_delete == False,
+            Product.is_active == True
+        )
+        .order_by(Product.created_at.desc())
+    )
 
     total_records = base_query.count()
 
@@ -220,9 +229,10 @@ def update_product(
 
     db.commit()
 
-
     return db.query(Product).options(
-    joinedload(Product.images)
+        joinedload(Product.category),
+        joinedload(Product.sub_category),
+        joinedload(Product.images)
     ).filter(Product.id == product.id).first()
 
 

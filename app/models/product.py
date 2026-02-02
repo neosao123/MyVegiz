@@ -46,3 +46,6 @@ class Product(Base):
         cascade="all, delete-orphan"
     )
 
+    # 🔗 RELATIONSHIPS
+    category = relationship("Category")
+    sub_category = relationship("SubCategory")

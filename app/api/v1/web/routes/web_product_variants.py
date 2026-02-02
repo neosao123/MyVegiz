@@ -28,7 +28,7 @@ def list_all_product_variants_api(
     page: int = Query(1, ge=1),
     limit: int = Query(10, ge=1),
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    # current_user: User = Depends(get_current_user),
 ):
     offset = (page - 1) * limit
 

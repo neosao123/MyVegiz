@@ -124,11 +124,27 @@ class ProductImageResponse(BaseModel):
         orm_from_attributes = True
 
 
+class CategoryResponse(BaseModel):
+    id: int
+    category_name: str
+
+    class Config:
+        orm_from_attributes = True
+
+
+class SubCategoryResponse(BaseModel):
+    id: int
+    sub_category_name: str
+
+    class Config:
+        orm_from_attributes = True
+
+
 class ProductResponse(BaseModel):
     uu_id: str
-    category_id: int
+    # category_id: int
     # category_name: str
-    sub_category_id: Optional[int]  
+    # sub_category_id: Optional[int]  
     # sub_category_name: Optional[str]
     product_name: str
     product_short_name: str
@@ -139,6 +155,10 @@ class ProductResponse(BaseModel):
     sku_code: Optional[str]
     is_active: bool
     created_at: datetime
+    # ✅ NEW NESTED OBJECTS
+    category: CategoryResponse
+    sub_category: Optional[SubCategoryResponse]
+
     images: List[ProductImageResponse]
 
     class Config:
@@ -148,6 +168,7 @@ class ProductResponse(BaseModel):
 
 class CategoryDropdownResponse(BaseModel):
     id: int
+    uu_id: str
     category_name: str
 
     class Config:
