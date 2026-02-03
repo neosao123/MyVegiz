@@ -67,7 +67,6 @@ def list_uoms(db: Session, offset: int, limit: int):
     # -------------------------------
     base_query = db.query(UOM).filter(
         UOM.is_delete == False,
-        UOM.is_active == True
     ).order_by(UOM.created_at.desc())
 
     total_records = base_query.count()

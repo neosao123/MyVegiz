@@ -1,6 +1,6 @@
 
 
-from fastapi import APIRouter, Depends, UploadFile, File
+from fastapi import APIRouter, Depends, UploadFile, File,Form
 from sqlalchemy.orm import Session
 from typing import List
 
@@ -20,12 +20,13 @@ from app.services.product_service import (
     update_product,
     soft_delete_product,
     get_category_dropdown,
-    get_sub_category_dropdown_by_category_uu_id
-)
+    get_sub_category_dropdown_by_category_uu_id)
 from app.models.user import User
 from app.models.product import Product
+from app.models.product_image import ProductImage
 from app.schemas.product import CategoryDropdownResponse
-from app.schemas.product import SubCategoryDropdownResponse
+from app.schemas.product import SubCategoryDropdownResponse,ProductImageResponse
+from app.core.exceptions import AppException
 
 router = APIRouter()
 
@@ -101,11 +102,11 @@ def list_products_api(
 def update_product_api(
     uu_id: str,
     product: ProductUpdate = Depends(ProductUpdate.as_form),
-    images: List[UploadFile] = File(None),
+    # images: List[UploadFile] = File(None),
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    data = update_product(db, uu_id, product, images)
+    data = update_product(db, uu_id, product)
     return {"status": 200, "message": "Product updated successfully", "data": data}
 
 

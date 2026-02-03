@@ -119,7 +119,7 @@ def list_products(db: Session, offset: int, limit: int):
     # -------------------------------
     base_query = db.query(Product).filter(
         Product.is_delete == False,
-        Product.is_active == True
+        # Product.is_active == True
     ).order_by(Product.created_at.desc())
 
     total_records = base_query.count()
@@ -134,7 +134,7 @@ def update_product(
     db: Session,
     uu_id: str,
     data: ProductUpdate,
-    images: list[UploadFile]
+    # images: list[UploadFile]
 ):
     product = db.query(Product).filter(
         Product.uu_id == uu_id,
@@ -203,28 +203,28 @@ def update_product(
     product.is_update = True
     product.updated_at = func.now()
 
-    # 🖼️ OPTIONAL IMAGE UPDATE
-    if images:
-        with db.no_autoflush:
-            db.query(ProductImage).filter(
-                ProductImage.product_id == product.id
-            ).delete()
+    # # 🖼️ OPTIONAL IMAGE UPDATE
+    # if images:
+    #     with db.no_autoflush:
+    #         db.query(ProductImage).filter(
+    #             ProductImage.product_id == product.id
+    #         ).delete()
 
-        for index, image in enumerate(images):
-            image_url = upload_product_image(image)
-            db.add(ProductImage(
-                product_id=product.id,
-                product_image=image_url,
-                is_primary=(index == 0)
-            ))
+    #     for index, image in enumerate(images):
+    #         image_url = upload_product_image(image)
+    #         db.add(ProductImage(
+    #             product_id=product.id,
+    #             product_image=image_url,
+    #             is_primary=(index == 0)
+    #         ))
 
     db.commit()
 
-
     return db.query(Product).options(
-    joinedload(Product.images)
+        joinedload(Product.images),
+        joinedload(Product.category),
+        joinedload(Product.sub_category)
     ).filter(Product.id == product.id).first()
-
 
 
 def soft_delete_product(db: Session, uu_id: str):

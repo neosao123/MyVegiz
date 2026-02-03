@@ -28,3 +28,5 @@ class Category(Base):
 
 
     main_category = relationship("MainCategory") 
+    # ✅ NO back_populates here
+    sub_categories = relationship("SubCategory", backref="category")
