@@ -1,5 +1,3 @@
-
-
 from itertools import product
 import uuid
 import re
@@ -34,7 +32,11 @@ def upload_product_image(file: UploadFile) -> str:
         folder="myvegiz/products",
         resource_type="image"
     )
-    return result["secure_url"]
+
+    return {
+        "url": result["secure_url"],
+        "public_id": result["public_id"]
+    }
 
 
 def generate_slug(name: str) -> str:
@@ -92,18 +94,20 @@ def create_product(
         db.flush()
 
         for index, image in enumerate(images or []):
+            upload = upload_product_image(image)
+
             db.add(ProductImage(
                 product_id=db_product.id,
-                product_image=upload_product_image(image),
-                is_primary=index == 0
+                product_image=upload["url"],
+                public_id=upload["public_id"],
+                is_primary=(index == 0)
             ))
 
-        db.commit()
-        product_with_images = db.query(Product).options(
-            joinedload(Product.images)
-        ).filter(Product.id == db_product.id).first()
 
-        return product_with_images
+        db.commit()
+    
+        return db.query(Product).options(joinedload(Product.images))\
+        .filter(Product.id == db_product.id).first()
     except IntegrityError as e:
         db.rollback()
         print("DB ERROR 👉", e.orig)   # 👈 THIS LINE
@@ -130,11 +134,14 @@ def list_products(db: Session, offset: int, limit: int):
 
 
 # ---------- UPDATE ----------
+
+
 def update_product(
     db: Session,
     uu_id: str,
     data: ProductUpdate,
-    # images: list[UploadFile]
+    removed_image_ids: list[int],
+    images: list[UploadFile]
 ):
     product = db.query(Product).filter(
         Product.uu_id == uu_id,
@@ -144,43 +151,17 @@ def update_product(
     if not product:
         raise AppException(status=404, message="Product not found")
 
-     # ---------- CATEGORY UPDATE (OPTIONAL) ----------
+
+    # ---------------- UPDATE PRODUCT FIELDS ----------------
     if data.category_id is not None:
-        category = db.query(Category).filter(
-            Category.id == data.category_id,
-            Category.is_delete == False
-        ).first()
-
-        if not category:
-            raise AppException(status=404, message="Category not found")
-
         product.category_id = data.category_id
 
-      # ---------- SUB CATEGORY UPDATE (OPTIONAL) ----------
     if data.sub_category_id is not None:
-        from app.models.sub_category import SubCategory
-
-        sub_category = db.query(SubCategory).filter(
-            SubCategory.id == data.sub_category_id,
-            SubCategory.is_delete == False
-        ).first()
-
-        if not sub_category:
-            raise AppException(status=404, message="Sub category not found")
-
-        # 🔒 Ensure sub-category belongs to category
-        if data.category_id and sub_category.category_id != data.category_id:
-            raise AppException(
-                status=400,
-                message="Sub category does not belong to selected category"
-            )
-
         product.sub_category_id = data.sub_category_id
 
-    # 🔐 UPDATE ONLY PROVIDED FIELDS
     if data.product_name is not None:
         product.product_name = data.product_name
-        product.slug = generate_slug(data.product_name)  
+        product.slug = generate_slug(data.product_name)
 
     if data.product_short_name is not None:
         product.product_short_name = data.product_short_name
@@ -203,22 +184,65 @@ def update_product(
     product.is_update = True
     product.updated_at = func.now()
 
-    # # 🖼️ OPTIONAL IMAGE UPDATE
-    # if images:
-    #     with db.no_autoflush:
-    #         db.query(ProductImage).filter(
-    #             ProductImage.product_id == product.id
-    #         ).delete()
+    # Count existing images BEFORE deletion
+    existing_count = db.query(ProductImage).filter(
+        ProductImage.product_id == product.id,
+    ).count()
 
-    #     for index, image in enumerate(images):
-    #         image_url = upload_product_image(image)
-    #         db.add(ProductImage(
-    #             product_id=product.id,
-    #             product_image=image_url,
-    #             is_primary=(index == 0)
-    #         ))
+    # Compute total images after update
+    total_images_after = existing_count - len(removed_image_ids or []) + len(images or [])
+
+    # Validation
+    if total_images_after == 0:
+        raise AppException(status=400, message="At least 1 product image is required")
+    if total_images_after > 5:
+        raise AppException(status=400, message="Maximum 5 images are allowed")
+
+
+    # ---------------- HARD DELETE IMAGES ----------------
+    if removed_image_ids:
+        imgs = db.query(ProductImage).filter(
+            ProductImage.id.in_(removed_image_ids),
+            ProductImage.product_id == product.id
+        ).all()
+
+        for img in imgs:
+            if img.public_id:
+                cloudinary.uploader.destroy(img.public_id)
+            db.delete(img)
+
+        db.flush()
+
+
+    # ---------------- ADD NEW IMAGES ----------------
+    if images:
+        for image in images:
+            upload = upload_product_image(image)
+            db.add(ProductImage(
+                product_id=product.id,
+                product_image=upload["url"],
+                public_id=upload["public_id"],
+                is_primary=False
+            ))
+
+    db.flush()
+
+    # ---------------- ENSURE ONE PRIMARY ----------------
+    primary = db.query(ProductImage).filter(
+        ProductImage.product_id == product.id,
+        ProductImage.is_primary == True
+    ).first()
+
+    if not primary:
+        first_img = db.query(ProductImage).filter(
+            ProductImage.product_id == product.id
+        ).order_by(ProductImage.created_at.asc()).first()
+        if first_img:
+            first_img.is_primary = True
+
 
     db.commit()
+    db.refresh(product)
 
     return db.query(Product).options(
         joinedload(Product.images),
@@ -241,19 +265,21 @@ def soft_delete_product(db: Session, uu_id: str):
     product.is_active = False
     product.deleted_at = func.now()
 
-    #  SOFT DELETE RELATED IMAGES
-    db.query(ProductImage).filter(
+        # 2️⃣ Fetch all related product images
+    images = db.query(ProductImage).filter(
         ProductImage.product_id == product.id,
-        ProductImage.is_delete == False
-    ).update(
-        {
-            ProductImage.is_delete: True,
-            ProductImage.is_active: False,
-            ProductImage.deleted_at: func.now(),
-            ProductImage.is_update: True
-        },
-        synchronize_session=False
-    )
+    ).all()
+
+        # 3️⃣ Hard delete images from Cloudinary and DB
+    for img in images:
+        if img.public_id:
+            try:
+                cloudinary.uploader.destroy(img.public_id)
+            except Exception as e:
+                print("Cloudinary deletion error:", e)
+        # Delete from DB
+        db.delete(img)
+
 
     db.commit()
     db.refresh(product)
@@ -262,15 +288,7 @@ def soft_delete_product(db: Session, uu_id: str):
 
 
 
-# def get_sub_category_dropdown(db: Session):
-#     return (
-#         db.query(SubCategory)
-#         .filter(
-#             SubCategory.is_active == True
-#         )
-#         .order_by(SubCategory.sub_category_name.asc())
-#         .all()
-#     )
+
 
 
 def get_category_dropdown(db: Session):

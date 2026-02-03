@@ -1,5 +1,3 @@
-
-
 from fastapi import APIRouter, Depends, UploadFile, File,Form
 from sqlalchemy.orm import Session
 from typing import List
@@ -100,13 +98,17 @@ def list_products_api(
 
 @router.put("/update", response_model=APIResponse[ProductResponse])
 def update_product_api(
-    uu_id: str,
+    uu_id: str,    
     product: ProductUpdate = Depends(ProductUpdate.as_form),
-    # images: List[UploadFile] = File(None),
+    removed_image_ids: List[int] = Form(default_factory=list),
+    images: List[UploadFile] = File(default_factory=list),
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    data = update_product(db, uu_id, product)
+    data = update_product(db, uu_id, product, removed_image_ids=removed_image_ids,
+        images=images)
+ 
+
     return {"status": 200, "message": "Product updated successfully", "data": data}
 
 

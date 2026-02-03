@@ -1,10 +1,9 @@
-
-
 from pydantic import BaseModel, field_validator
 from fastapi import Form
 from typing import Optional, List
 from datetime import datetime
 import re
+from fastapi import Form, UploadFile, File
 
 
 class ProductCreate(BaseModel):
@@ -18,6 +17,7 @@ class ProductCreate(BaseModel):
     hsn_code: Optional[str] = None
     sku_code: Optional[str] = None
     is_active: bool = True
+    images: Optional[List[UploadFile]] = None  # ✅ NEW FIELD
 
     @classmethod
     def as_form(
@@ -31,6 +31,8 @@ class ProductCreate(BaseModel):
         hsn_code: Optional[str] = Form(None),
         sku_code: Optional[str] = Form(None),
         is_active: bool = Form(True),
+        images: Optional[List[UploadFile]] = File(None)  # ✅ handle form upload
+
     ):
         return cls(
             category_id=category_id,
@@ -41,7 +43,8 @@ class ProductCreate(BaseModel):
             long_description=long_description,
             hsn_code=hsn_code,
             sku_code=sku_code,
-            is_active=is_active
+            is_active=is_active,
+            images=images
         )
 
     @field_validator("product_name", "product_short_name", mode="before")
@@ -67,6 +70,17 @@ class ProductCreate(BaseModel):
             )
         return v
 
+        # ---------- NEW IMAGE VALIDATION ----------
+    @field_validator("images")
+    @classmethod
+    def validate_images(cls, v):
+        if not v or len(v) == 0:
+            raise ValueError("At least 1 product image is required")
+        if len(v) > 5:
+            raise ValueError("Maximum 5 images are allowed")
+        return v
+
+
 class ProductUpdate(BaseModel):
     category_id: Optional[int] = None
     sub_category_id: Optional[int] = None
@@ -77,10 +91,13 @@ class ProductUpdate(BaseModel):
     hsn_code: Optional[str] = None
     sku_code: Optional[str] = None
     is_active: Optional[bool] = None
+    images: Optional[List[UploadFile]] = None  # ✅ NEW FIELD
 
     @classmethod
     def as_form(
         cls,
+        category_id: Optional[int] = Form(None),
+        sub_category_id: Optional[int] = Form(None),
         product_name: Optional[str] = Form(None),
         product_short_name: Optional[str] = Form(None),
         short_description: Optional[str] = Form(None),
@@ -88,8 +105,12 @@ class ProductUpdate(BaseModel):
         hsn_code: Optional[str] = Form(None),
         sku_code: Optional[str] = Form(None),
         is_active: Optional[bool] = Form(None),
+        images: Optional[List[UploadFile]] = File(None)
+
     ):
         return cls(
+            category_id=category_id,
+            sub_category_id=sub_category_id,
             product_name=product_name.strip() if product_name else None,
             product_short_name=product_short_name.strip() if product_short_name else None,
             short_description=short_description.strip() if short_description else None,
@@ -115,10 +136,18 @@ class ProductUpdate(BaseModel):
             raise ValueError("SKU format must be like APP-FRU-001")
         return v
 
+        # ---------- NEW IMAGE VALIDATION ----------
+    @field_validator("images")
+    @classmethod
+    def validate_images(cls, v):
+        if v and len(v) > 5:
+            raise ValueError("Maximum 5 images are allowed")
+        return v
 
 class ProductImageResponse(BaseModel):
     product_image: str
     is_primary: bool
+    id:int
 
     class Config:
         orm_from_attributes = True
@@ -183,5 +212,3 @@ class SubCategoryDropdownResponse(BaseModel):
 
     class Config:
         orm_from_attributes = True
-
-
