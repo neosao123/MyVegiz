@@ -27,3 +27,4 @@ class EntityCategory(Base):
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
     deleted_at = Column(DateTime(timezone=True), nullable=True)
 
+    main_category = relationship("MainCategory")
