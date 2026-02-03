@@ -43,3 +43,18 @@ class ProductVariants(Base):
 
     product = relationship("Product")
     uom = relationship("UOM")
+    zone = relationship("Zone")
+    
+
+    @property
+    def product_name(self):
+        return self.product.product_name if self.product else None
+
+    @property
+    def uom_name(self):
+        return self.uom.uom_name if self.uom else None
+
+    @property
+    def zone_name(self):
+        return self.zone.zone_name if self.zone else None
+

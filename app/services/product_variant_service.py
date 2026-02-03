@@ -107,12 +107,18 @@ def bulk_create_product_variants(
 import math
 from sqlalchemy.orm import Session
 from app.models.product_variants import ProductVariants
+from sqlalchemy.orm import joinedload
+
 
 def list_all_product_variants(db: Session, offset: int, limit: int):
     # -------------------------------
     # Base filters (soft delete aware)
     # -------------------------------
-    base_query = db.query(ProductVariants).filter(
+    base_query = db.query(ProductVariants).options(
+        joinedload(ProductVariants.product),
+        joinedload(ProductVariants.uom),
+        joinedload(ProductVariants.zone)
+    ).filter(
         ProductVariants.is_delete == False,
         ProductVariants.is_active == True
     ).order_by(ProductVariants.created_at.desc())
@@ -190,3 +196,46 @@ def soft_delete_product_variant(
     except IntegrityError:
         db.rollback()
         raise AppException(status=500, message="Failed to delete variant")
+
+
+
+
+from sqlalchemy.orm import Session
+from app.models.zone import Zone
+from app.models.uom import UOM
+
+
+# -------------------------
+# ZONE DROPDOWN
+# -------------------------
+def list_zone_dropdown(db: Session):
+    zones = db.query(Zone).filter(
+        Zone.is_delete == False,
+        Zone.is_active == True
+    ).order_by(Zone.zone_name.asc()).all()
+
+    return zones
+
+
+# -------------------------
+# UOM DROPDOWN
+# -------------------------
+def list_uom_dropdown(db: Session):
+    uoms = db.query(UOM).filter(
+        UOM.is_delete == False,
+        UOM.is_active == True
+    ).order_by(UOM.uom_name.asc()).all()
+
+    return uoms
+
+
+# -------------------------
+# PRODUCT DROPDOWN
+# -------------------------
+def list_product_dropdown(db: Session):
+    products = db.query(Product).filter(
+        Product.is_delete == False,
+        Product.is_active == True
+    ).order_by(Product.product_name.asc()).all()
+
+    return products
