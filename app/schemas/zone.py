@@ -31,18 +31,25 @@ class ZoneCreate(BaseModel):
             is_deliverable=is_deliverable,
             is_active=is_active,
         )
-
+    
     @field_validator("polygon")
     @classmethod
     def validate_polygon(cls, v):
-        if not v or len(v) < 3:
-            raise ValueError("Polygon must have at least 3 points")
+        if not v or len(v) < 5:
+            raise ValueError("Polygon must have at least 5 points")
 
+        seen = set()
         for p in v:
             if "lat" not in p or "lng" not in p:
                 raise ValueError("Each point must contain lat & lng")
 
+            key = (p["lat"], p["lng"])
+            if key in seen:
+                raise ValueError("Duplicate lat/lng points are not allowed in polygon")
+            seen.add(key)
+
         return v
+
 
 
 class ZoneUpdate(BaseModel):
@@ -71,6 +78,29 @@ class ZoneUpdate(BaseModel):
             is_deliverable=is_deliverable,
             is_active=is_active,
         )
+    
+        
+    @field_validator("polygon")
+    @classmethod
+    def validate_polygon(cls, v):
+        # ✅ If polygon is not provided → skip validation
+        if v is None:
+            return v
+
+        if len(v) < 5:
+            raise ValueError("Polygon must have at least 5 points")
+
+        seen = set()
+        for p in v:
+            if "lat" not in p or "lng" not in p:
+                raise ValueError("Each point must contain lat & lng")
+
+            key = (p["lat"], p["lng"])
+            if key in seen:
+                raise ValueError("Duplicate lat/lng points are not allowed in polygon")
+            seen.add(key)
+
+        return v
 
 
 class ZoneResponse(BaseModel):
@@ -85,3 +115,8 @@ class ZoneResponse(BaseModel):
 
     class Config:
         orm_from_attributes = True
+
+
+class ZonePointResponse(BaseModel):
+    lat: float
+    lng: float

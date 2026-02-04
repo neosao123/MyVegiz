@@ -2,7 +2,7 @@ from sqlalchemy import Column, Integer, String, Boolean, DateTime,ForeignKey
 from sqlalchemy.sql import func
 from app.db.base import Base
 from sqlalchemy.orm import relationship
-
+from app.models.menu import Menu
 
 class MenuCategory(Base):
     __tablename__ = "menu_categories"
@@ -29,3 +29,4 @@ class MenuCategory(Base):
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
     deleted_at = Column(DateTime(timezone=True), nullable=True)
 
+    menu = relationship("Menu")

@@ -6,16 +6,18 @@ from app.services.zone_service import (
     create_zone,
     list_zones,
     update_zone,
-    delete_zone
+    delete_zone,
+    list_all_deliverable_points
 )
 from app.api.dependencies import get_current_user
 from app.models.user import User
 router = APIRouter()
 from app.schemas.response import APIResponse
-from app.schemas.zone import ZoneResponse
+from app.schemas.zone import ZoneResponse,ZonePointResponse
 from app.services.zone_service import get_zones_by_lat_lng
 from app.schemas.response import PaginatedAPIResponse
 import math
+from typing import List
 
 
 @router.post("/create", response_model=APIResponse[ZoneResponse])
@@ -32,18 +34,7 @@ def create(
     }
 
 
-# @router.get("/list", response_model=APIResponse[list[ZoneResponse]])
-# def list_zones(
-#     db: Session = Depends(get_db),
-#     current_user: User = Depends(get_current_user)
-# ):
-#     zones = get_zones(db)
 
-#     return {
-#         "status": 200,
-#         "message": "Zones fetched successfully",
-#         "data": zones
-#     }
 @router.get("/list", response_model=PaginatedAPIResponse[list[ZoneResponse]])
 def list_zones_api(
     page: int = Query(1, ge=1),
@@ -140,4 +131,24 @@ def list_zones_by_lat_lng(
         "status": 200,
         "message": "Zones fetched successfully",
         "data": zones
+    }
+
+
+
+
+
+@router.get(
+    "/points",
+    response_model=APIResponse[List[ZonePointResponse]]
+)
+def list_all_zone_points_api(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    points = list_all_deliverable_points(db)
+
+    return {
+        "status": 200,
+        "message": "All deliverable zone points fetched successfully",
+        "data": points
     }

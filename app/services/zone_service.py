@@ -7,7 +7,36 @@ from sqlalchemy.exc import IntegrityError
 from app.utils.geo import point_in_polygon
 from app.models.zone import Zone
 
+def validate_polygon_uniqueness(
+    db: Session,
+    polygon: list[dict],
+    exclude_zone_id: int | None = None
+):
+    zones = db.query(Zone).filter(
+        Zone.is_delete == False,
+        Zone.is_active == True
+    ).all()
+
+    for zone in zones:
+        if exclude_zone_id and zone.id == exclude_zone_id:
+            continue
+
+        if not zone.polygon:
+            continue
+
+        for point in polygon:
+            if point_in_polygon(point["lat"], point["lng"], zone.polygon):
+                raise AppException(
+                    status=400,
+                    message=(
+                        f"Lat/Lng ({point['lat']}, {point['lng']}) "
+                        f"already exists inside zone '{zone.zone_name}'"
+                    )
+                )
+
 def create_zone(db: Session, data: ZoneCreate):
+    validate_polygon_uniqueness(db, data.polygon)
+
     zone = Zone(
         zone_name=data.zone_name,
         city=data.city,
@@ -48,6 +77,14 @@ def update_zone(db: Session, zone_id: int, data: ZoneUpdate):
 
     if not zone:
         raise AppException(status=404, message="Zone not found")
+
+    if data.polygon is not None:
+        validate_polygon_uniqueness(
+            db,
+            data.polygon,
+            exclude_zone_id=zone.id
+        )
+        zone.polygon = data.polygon
 
     if data.zone_name is not None:
         zone.zone_name = data.zone_name
@@ -111,3 +148,24 @@ def get_zones_by_lat_lng(db, lat: float, lng: float):
             matched_zones.append(zone)
 
     return matched_zones
+
+
+
+def list_all_deliverable_points(db: Session):
+    zones = db.query(Zone).filter(
+        Zone.is_delete == False,
+        Zone.is_active == True,
+        Zone.is_deliverable == True,
+        Zone.polygon.isnot(None)
+    ).all()
+
+    points = []
+
+    for zone in zones:
+        for p in zone.polygon:
+            points.append({
+                "lat": p["lat"],
+                "lng": p["lng"]
+            })
+
+    return points
