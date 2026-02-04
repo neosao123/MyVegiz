@@ -99,19 +99,61 @@ def verify_otp_and_login(db: Session, mobile: str, otp: str):
 
 
 
+import requests
 from sqlalchemy.orm import Session
 from datetime import datetime, timedelta, timezone
 
 from app.models.otp import MobileOTP
+from app.core.exceptions import AppException
 
-DEFAULT_OTP = "123456"
+
+# -------------------------
+# TEXTBEE CONFIG
+# -------------------------
+TEXTBEE_BASE_URL = "https://api.textbee.dev/api/v1"
+TEXTBEE_API_KEY = "785f4aab-acdf-4e3d-a728-36fb99be15b9"
+TEXTBEE_DEVICE_ID = "6981e01e0450813c9a48cc9a"
+
+
+DEFAULT_OTP = "109876"
 OTP_EXPIRY_MINUTES = 10
+
+
+def send_sms_via_textbee(mobile: str, otp: str):
+    try:
+        response = requests.post(
+            f"{TEXTBEE_BASE_URL}/gateway/devices/{TEXTBEE_DEVICE_ID}/send-sms",
+            json={
+                "recipients": [f"+91{mobile}"],  # 🇮🇳 India format
+                "message": f"Your OTP is {otp}. Valid for 10 minutes."
+            },
+            headers={
+                "x-api-key": TEXTBEE_API_KEY,
+                "Content-Type": "application/json"
+            },
+            timeout=10
+        )
+
+        if response.status_code not in [200, 201]:
+            raise AppException(
+                status=500,
+                message="Failed to send OTP SMS"
+            )
+
+        return response.json()
+
+    except requests.exceptions.RequestException:
+        raise AppException(
+            status=500,
+            message="SMS service not reachable"
+        )
+
 
 
 def send_otp(db: Session, mobile: str):
     now = datetime.now(timezone.utc)
 
-    # 🔍 STEP 1: Check for existing unverified & unexpired OTP
+    # STEP 1: Check existing valid OTP
     existing_otp = (
         db.query(MobileOTP)
         .filter(
@@ -123,20 +165,23 @@ def send_otp(db: Session, mobile: str):
         .first()
     )
 
-    #  STEP 2: If valid OTP exists → reuse it
     if existing_otp:
+        # RESEND SAME OTP
+        send_sms_via_textbee(mobile, existing_otp.otp)
         return existing_otp
 
-    # 🔴 STEP 3: Delete expired OTPs
+    # STEP 2: Delete expired OTPs
     db.query(MobileOTP).filter(
         MobileOTP.mobile == mobile,
         MobileOTP.expires_at <= now
     ).delete(synchronize_session=False)
 
-    # 🔴 STEP 4: Create new OTP
+    # STEP 3: Generate OTP
+    otp_code = DEFAULT_OTP  # later replace with random generator
+
     otp_entry = MobileOTP(
         mobile=mobile,
-        otp=DEFAULT_OTP,
+        otp=otp_code,
         expires_at=now + timedelta(minutes=OTP_EXPIRY_MINUTES)
     )
 
@@ -144,7 +189,11 @@ def send_otp(db: Session, mobile: str):
     db.commit()
     db.refresh(otp_entry)
 
+    # SEND OTP VIA TEXTBEE
+    send_sms_via_textbee(mobile, otp_code)
+
     return otp_entry
+
 
 
 def verify_otp(db: Session, mobile: str, otp: str):
