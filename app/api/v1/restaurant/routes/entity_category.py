@@ -37,10 +37,7 @@ def create_entity_category_api(
 
 
 
-@router.get(
-    "/list",
-    response_model=PaginatedAPIResponse[list[EntityCategoryResponse]]
-)
+@router.get("/list",response_model=PaginatedAPIResponse[list[EntityCategoryResponse]])
 def list_entity_category_api(
     page: int = Query(1, ge=1),
     limit: int = Query(10, ge=1),
@@ -92,10 +89,7 @@ def list_entity_category_api(
 
 
 
-@router.put(
-    "/update",
-    response_model=APIResponse[EntityCategoryResponse]
-)
+@router.put("/update",response_model=APIResponse[EntityCategoryResponse])
 def update_entity_category_api(
     uu_id: str,
     data: EntityCategoryUpdate = Depends(EntityCategoryUpdate.as_form),
@@ -111,10 +105,7 @@ def update_entity_category_api(
 
 
 
-@router.delete(
-    "/delete",
-    response_model=APIResponse[EntityCategoryResponse]
-)
+@router.delete("/delete",response_model=APIResponse[EntityCategoryResponse])
 def delete_entity_category_api(
     uu_id: str,
     db: Session = Depends(get_db),

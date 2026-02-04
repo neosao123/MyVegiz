@@ -120,7 +120,7 @@ def list_all_product_variants(db: Session, offset: int, limit: int):
         joinedload(ProductVariants.zone)
     ).filter(
         ProductVariants.is_delete == False,
-        ProductVariants.is_active == True
+        # ProductVariants.is_active == True
     ).order_by(ProductVariants.created_at.desc())
 
     total_records = base_query.count()

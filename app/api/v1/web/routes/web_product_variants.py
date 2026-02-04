@@ -11,6 +11,7 @@ from app.schemas.web_product_variants import ProductVariantResponse
 from app.services.web_product_variants_service import list_all_product_variants
 from app.schemas.response import APIResponse, PaginatedAPIResponse
 from fastapi import HTTPException
+from fastapi import Path
 
 
 
@@ -19,15 +20,15 @@ router = APIRouter()
 
 
 @router.get(
-    "/list",
+    "/{main_category_slug}/list",
     response_model=PaginatedAPIResponse[List[ProductVariantResponse]]
 )
 def list_all_product_variants_api(
+    main_category_slug: str = Path(..., description="Main category slug"),
     lat: float = Query(...),
     lng: float = Query(...),
     page: int = Query(1, ge=1),
     limit: int = Query(10, ge=1),
-    main_category_slug: str | None = Query(None),
     db: Session = Depends(get_db),
     # current_user: User = Depends(get_current_user),
 ):
@@ -35,7 +36,7 @@ def list_all_product_variants_api(
 
     try:
         total_records, variants, error_message = list_all_product_variants(
-            db, lat, lng, offset, limit,main_category_slug=main_category_slug
+            db, lat, lng, offset, limit,main_category_slug
         )
 
         if error_message:

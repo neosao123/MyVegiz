@@ -3,6 +3,8 @@ from sqlalchemy.sql import func
 from app.db.base import Base
 from sqlalchemy.orm import relationship
 
+from app.models.menu import Menu
+from app.models.menu_category import MenuCategory
 
 class MenuItem(Base):
     __tablename__ = "menu_items"
@@ -52,3 +54,5 @@ class MenuItem(Base):
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
     deleted_at = Column(DateTime(timezone=True), nullable=True)
 
+    menu = relationship("Menu")
+    menu_category = relationship("MenuCategory")
