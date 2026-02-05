@@ -15,6 +15,55 @@ from app.core.exceptions import AppException
 import cloudinary.uploader
 from sqlalchemy.orm import joinedload
 
+from app.core.search import apply_trigram_search
+
+
+# Search Functioanlity
+def search_products(
+    db,
+    search: str,
+    offset: int,
+    limit: int
+):
+    query = (
+        db.query(Product)
+        .join(Category)
+        .outerjoin(SubCategory)
+        .filter(
+            Product.is_delete == False,
+            Product.is_active == True
+        )
+        .options(
+            joinedload(Product.images),
+            joinedload(Product.category),
+            joinedload(Product.sub_category)
+        )
+    )
+
+    query = apply_trigram_search(
+        query=query,
+        search=search,
+        fields=[
+            Product.product_name,
+            Product.product_short_name,
+            Category.category_name,
+            SubCategory.sub_category_name
+        ],
+        order_fields=[
+            Product.product_name,
+            Product.product_short_name,
+            Category.category_name,
+            SubCategory.sub_category_name
+        ]
+    )
+
+    total = query.count()
+    products = query.offset(offset).limit(limit).all()
+
+    return total, products
+
+
+
 MAX_IMAGE_SIZE = 1 * 1024 * 1024
 ALLOWED_TYPES = ["image/jpeg", "image/png", "image/jpg"]
 
@@ -39,6 +88,8 @@ def upload_product_image(file: UploadFile) -> str:
         "url": result["secure_url"],
         "public_id": result["public_id"]
     }
+
+
 
 # =========================================================
 # SLUG GENERATOR
