@@ -11,7 +11,9 @@ from app.services.product_service import (
     update_product,
     soft_delete_product,
     get_category_dropdown,
-    get_sub_category_dropdown_by_category_uu_id)
+    get_sub_category_dropdown_by_category_uu_id,
+    search_products
+)
 from app.models.user import User
 from app.models.product import Product
 from app.models.product_image import ProductImage
@@ -43,6 +45,7 @@ def add_product(
 def list_products_api(
     page: int = Query(1, ge=1),
     limit: int = Query(10, ge=1),
+    q: str | None = Query(None, description="Search keyword"),
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
@@ -52,10 +55,20 @@ def list_products_api(
         # -------------------------------
         offset = (page - 1) * limit
 
+        if q:
+            total_records, products = search_products(
+                db=db,
+                search=q,
+                offset=offset,
+                limit=limit
+            )
+        else:
+            total_records, products = list_products(db, offset, limit)
+
         # -------------------------------
         # Fetch sliders
         # -------------------------------
-        total_records, products = list_products(db, offset, limit)
+        # total_records, products = list_products(db, offset, limit)
 
         total_pages = math.ceil(total_records / limit) if limit else 1
 
