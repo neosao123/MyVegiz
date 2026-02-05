@@ -4,7 +4,10 @@ from fastapi import Form
 from typing import Optional
 from datetime import datetime
 
-
+# =====================================================
+# ENTITY CATEGORY – CREATE SCHEMA
+# Used when creating a new entity category
+# =====================================================
 class EntityCategoryCreate(BaseModel):
     entity_category: str
     main_category_id: Optional[int] = 17
@@ -24,6 +27,11 @@ class EntityCategoryCreate(BaseModel):
         )
 
 
+
+# =====================================================
+# ENTITY CATEGORY – RESPONSE SCHEMA
+# Used for API responses (list / create / update)
+# =====================================================
 class EntityCategoryResponse(BaseModel):
     id: int
     uu_id: str
@@ -38,6 +46,10 @@ class EntityCategoryResponse(BaseModel):
 
 
 
+# =====================================================
+# ENTITY CATEGORY – UPDATE SCHEMA
+# Used when updating an existing entity category
+# =====================================================
 class EntityCategoryUpdate(BaseModel):
     entity_category: Optional[str] = None
     is_active: Optional[bool] = None

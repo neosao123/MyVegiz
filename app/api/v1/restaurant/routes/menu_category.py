@@ -23,6 +23,9 @@ from app.services.restaurant_menu_category_service import (
 router = APIRouter()
 
 
+# -------------------------
+# CREATE Menu Category
+# -------------------------
 @router.post("/create", response_model=APIResponse[MenuCategoryResponse])
 def create_menu_category_api(
     data: MenuCategoryCreate = Depends(MenuCategoryCreate.as_form),
@@ -36,6 +39,11 @@ def create_menu_category_api(
     }
 
 
+
+
+# -------------------------
+# list for Menu Category
+# -------------------------
 @router.get("/list", response_model=PaginatedAPIResponse[list[MenuCategoryResponse]])
 def list_menu_category_api(
     page: int = Query(1, ge=1),
@@ -86,6 +94,10 @@ def list_menu_category_api(
                 }
 
 
+
+# -------------------------
+# UPDATE Menu Category
+# -------------------------
 @router.put("/update", response_model=APIResponse[MenuCategoryResponse])
 def update_menu_category_api(
     uu_id: str,
@@ -100,6 +112,10 @@ def update_menu_category_api(
     }
 
 
+
+# -------------------------
+# DELETE Menu Category
+# -------------------------
 @router.delete("/delete", response_model=APIResponse[MenuCategoryResponse])
 def delete_menu_category_api(
     uu_id: str,
@@ -113,6 +129,10 @@ def delete_menu_category_api(
     }
 
 
+
+# -------------------------
+# Menu Dropdown  
+# -------------------------
 @router.get(
     "/menus",
     response_model=APIResponse[List[MenuDropdownResponse]]

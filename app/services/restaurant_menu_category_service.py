@@ -12,12 +12,19 @@ from app.schemas.restaurant_menu_category import (
 from app.core.exceptions import AppException
 
 
+# =====================================================
+# MENU CATEGORY CODE GENERATOR
+# Generates sequential codes like MCAT_1, MCAT_2
+# =====================================================
 def generate_menu_category_code(db: Session) -> str:
     last = db.query(MenuCategory).order_by(MenuCategory.id.desc()).first()
     next_id = last.id + 1 if last else 1
     return f"MCAT_{next_id}"
 
 
+# =====================================================
+# CREATE MENU CATEGORY
+# =====================================================
 def create_menu_category(db: Session, data: MenuCategoryCreate):
     exists = db.query(MenuCategory).filter(
         MenuCategory.menu_category == data.menu_category,
@@ -42,6 +49,10 @@ def create_menu_category(db: Session, data: MenuCategoryCreate):
     return entity
 
 
+# =====================================================
+# LIST MENU CATEGORIES (PAGINATED)
+# Optional filter by menu_id
+# =====================================================
 def list_menu_categories(db: Session, offset: int, limit: int, menu_id: int | None = None):
     base_query = db.query(MenuCategory).filter(
         MenuCategory.is_delete == False
@@ -55,6 +66,9 @@ def list_menu_categories(db: Session, offset: int, limit: int, menu_id: int | No
     return total, data
 
 
+# =====================================================
+# UPDATE MENU CATEGORY
+# =====================================================
 def update_menu_category(db: Session, uu_id: str, data: MenuCategoryUpdate):
     entity = db.query(MenuCategory).filter(
         MenuCategory.uu_id == uu_id,
@@ -88,6 +102,9 @@ def update_menu_category(db: Session, uu_id: str, data: MenuCategoryUpdate):
     return entity
 
 
+# =====================================================
+# DELETE MENU CATEGORY (SOFT DELETE)
+# =====================================================
 def delete_menu_category(db: Session, uu_id: str):
     entity = db.query(MenuCategory).filter(
         MenuCategory.uu_id == uu_id,
@@ -106,7 +123,11 @@ def delete_menu_category(db: Session, uu_id: str):
     db.refresh(entity)
     return entity
 
-
+# =====================================================
+# MENU DROPDOWN LIST
+# Returns only active & non-deleted menus
+# Used for dropdown selections
+# =====================================================
 def list_menu_dropdown(db: Session):
     menus = db.query(Menu).filter(
         Menu.is_delete == False,

@@ -23,6 +23,9 @@ from app.services.restaurant_entity_category_service import (
 router = APIRouter()
 
 
+# -------------------------
+# CREATE Entity Category
+# -------------------------
 @router.post("/create", response_model=APIResponse[EntityCategoryResponse])
 def create_entity_category_api(
     data: EntityCategoryCreate = Depends(EntityCategoryCreate.as_form),
@@ -37,6 +40,9 @@ def create_entity_category_api(
 
 
 
+# -------------------------
+# List for Entity Category
+# -------------------------
 @router.get("/list",response_model=PaginatedAPIResponse[list[EntityCategoryResponse]])
 def list_entity_category_api(
     page: int = Query(1, ge=1),
@@ -87,8 +93,9 @@ def list_entity_category_api(
     
 
 
-
-
+# -------------------------
+# UPDATE Entity Category
+# -------------------------
 @router.put("/update",response_model=APIResponse[EntityCategoryResponse])
 def update_entity_category_api(
     uu_id: str,
@@ -104,7 +111,9 @@ def update_entity_category_api(
 
 
 
-
+# -------------------------
+# DELETE Entity Category
+# -------------------------
 @router.delete("/delete",response_model=APIResponse[EntityCategoryResponse])
 def delete_entity_category_api(
     uu_id: str,

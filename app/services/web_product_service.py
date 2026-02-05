@@ -3,6 +3,11 @@ from sqlalchemy.orm import Session, joinedload
 from app.models.product import Product
 
 
+# =====================================================
+# LIST WEB PRODUCTS (PAGINATED)
+# Used for website product listing
+# Supports category, sub-category & slug filters
+# =====================================================
 def list_web_products(
     db: Session,
     offset: int,

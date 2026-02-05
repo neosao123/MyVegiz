@@ -4,7 +4,11 @@ from app.models.category import Category
 from app.models.main_category import MainCategory
 
 
-
+# =====================================================
+# BASE QUERY
+# Returns active web categories with main category name
+# Used for listing categories on website
+# =====================================================
 def web_category_with_main_name_query(db: Session):
     return (
         db.query(
@@ -29,7 +33,10 @@ def web_category_with_main_name_query(db: Session):
     )
 
 
-
+# =====================================================
+# LIST WEB CATEGORIES (PAGINATED)
+# Optionally filter by main_category_id
+# =====================================================
 def list_web_categories(
     db: Session,
     offset: int,

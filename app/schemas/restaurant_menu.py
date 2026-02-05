@@ -4,9 +4,10 @@ from typing import Optional
 from datetime import datetime
 
 
-# -------------------------
-# CREATE
-# -------------------------
+# =====================================================
+# MENU – CREATE SCHEMA
+# Used when creating a new menu (e.g., Breakfast, Lunch)
+# =====================================================
 class MenuCreate(BaseModel):
     menu: str
     priority: Optional[int] = 0
@@ -26,9 +27,10 @@ class MenuCreate(BaseModel):
         )
 
 
-# -------------------------
-# RESPONSE
-# -------------------------
+# =====================================================
+# MENU – RESPONSE SCHEMA
+# Used in API responses (create / list / update)
+# =====================================================
 class MenuResponse(BaseModel):
     id: int
     uu_id: str
@@ -42,9 +44,10 @@ class MenuResponse(BaseModel):
         orm_from_attributes = True
 
 
-# -------------------------
-# UPDATE
-# -------------------------
+# =====================================================
+# MENU – UPDATE SCHEMA
+# Used when updating an existing menu
+# =====================================================
 class MenuUpdate(BaseModel):
     menu: Optional[str] = None
     priority: Optional[int] = None

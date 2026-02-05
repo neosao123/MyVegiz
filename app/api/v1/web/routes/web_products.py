@@ -12,6 +12,10 @@ router = APIRouter()
 
 from app.services.web_product_service import list_web_products
 
+
+# -------------------------
+# LIST for Product
+# -------------------------
 @router.get(
     "/list",
     response_model=PaginatedAPIResponse[List[ProductResponse]]

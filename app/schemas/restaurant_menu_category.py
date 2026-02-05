@@ -4,6 +4,10 @@ from typing import Optional
 from datetime import datetime
 
 
+# =====================================================
+# MENU CATEGORY – CREATE SCHEMA
+# Used when creating a new menu category
+# =====================================================
 class MenuCategoryCreate(BaseModel):
     menu_id: int
     menu_category: str
@@ -23,6 +27,10 @@ class MenuCategoryCreate(BaseModel):
         )
 
 
+# =====================================================
+# MENU CATEGORY – RESPONSE SCHEMA
+# Used for API responses (list / create / update)
+# =====================================================
 class MenuCategoryResponse(BaseModel):
     id: int
     uu_id: str
@@ -36,6 +44,10 @@ class MenuCategoryResponse(BaseModel):
         orm_from_attributes = True
 
 
+# =====================================================
+# MENU CATEGORY – UPDATE SCHEMA
+# Used when updating an existing menu category
+# =====================================================
 class MenuCategoryUpdate(BaseModel):
     menu_category: Optional[str] = None
     is_active: Optional[bool] = None
@@ -52,6 +64,11 @@ class MenuCategoryUpdate(BaseModel):
         )
 
 
+
+# =====================================================
+# MENU DROPDOWN – RESPONSE SCHEMA
+# Used for dropdown selections (Menu list)
+# =====================================================
 class MenuDropdownResponse(BaseModel):
     menu_id: int
     menu_name: str

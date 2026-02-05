@@ -3,13 +3,16 @@ from sqlalchemy.orm import Session
 import math
 
 from app.api.dependencies import get_db
-from app.schemas.slider import SliderResponse
+from app.schemas.web_slider import SliderResponse
 from app.schemas.response import PaginatedAPIResponse
 from app.services.web_slider_service import list_sliders  
 
 router = APIRouter()
 
 
+# -------------------------
+# LIST for Slider
+# -------------------------
 @router.get("/list", response_model=PaginatedAPIResponse[list[SliderResponse]])
 def list_web_sliders(
     page: int = Query(1, ge=1),

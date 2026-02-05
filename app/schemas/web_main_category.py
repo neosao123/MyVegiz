@@ -3,6 +3,10 @@ from typing import Optional
 from datetime import datetime
 
 
+# =====================================================
+# WEB MAIN CATEGORY – RESPONSE SCHEMA
+# Used for returning main category data to web
+# =====================================================
 class WebMainCategoryResponse(BaseModel):
     id: int
     uu_id: str

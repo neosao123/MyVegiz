@@ -3,6 +3,9 @@ from datetime import datetime
 from typing import Optional
 
 
+# =====================================================
+# PRODUCT IMAGE 
+# =====================================================
 class ProductImageMiniResponse(BaseModel):
     product_image: str
 
@@ -10,7 +13,9 @@ class ProductImageMiniResponse(BaseModel):
         orm_from_attributes = True
 
 
-
+# =====================================================
+# CATEGORY 
+# =====================================================
 class CategoryMiniResponse(BaseModel):
     id: int
     category_name: str
@@ -19,7 +24,9 @@ class CategoryMiniResponse(BaseModel):
         orm_from_attributes = True
 
 
-
+# =====================================================
+# SUB-CATEGORY 
+# =====================================================
 class SubCategoryMiniResponse(BaseModel):
     id: int
     sub_category_name: str
@@ -28,6 +35,9 @@ class SubCategoryMiniResponse(BaseModel):
         orm_from_attributes = True
 
 
+# =====================================================
+# PRODUCT 
+# =====================================================
 class ProductMiniResponse(BaseModel):
     id: int
     product_name: str
@@ -51,7 +61,9 @@ class ProductMiniResponse(BaseModel):
         return None
 
 
-
+# =====================================================
+# UNIT OF MEASUREMENT 
+# =====================================================
 class UOMMiniResponse(BaseModel):
     id: int
     uom_name: str
@@ -61,6 +73,9 @@ class UOMMiniResponse(BaseModel):
         orm_from_attributes = True
 
 
+# =====================================================
+# PRODUCT VARIANT RESPONSE
+# =====================================================
 class ProductVariantResponse(BaseModel):
     id: int
     uu_id: str
