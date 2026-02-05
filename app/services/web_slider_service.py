@@ -8,6 +8,11 @@ from app.core.exceptions import AppException
 from sqlalchemy.sql import func
 
 
+# =====================================================
+# LIST SLIDERS (WEB)
+# Fetch active sliders for banners
+# Soft-delete & active aware
+# =====================================================
 def list_sliders(db: Session, offset: int, limit: int):
     # -------------------------------
     # Base filters (soft delete aware)

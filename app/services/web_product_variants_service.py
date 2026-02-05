@@ -1,11 +1,9 @@
-from sqlalchemy.orm import Session
-from app.models.product_variants import ProductVariants
-from app.models.zone import Zone
+from sqlalchemy.orm import Session,joinedload
 from app.utils.geo import point_in_polygon
 
 
-
-from sqlalchemy.orm import Session, joinedload
+from app.models.product_variants import ProductVariants
+from app.models.zone import Zone
 from app.models.product import Product
 from app.models.uom import UOM
 from app.models.category import Category
@@ -13,6 +11,11 @@ from app.models.sub_category import SubCategory
 from app.models.main_category import MainCategory
 
 
+# =====================================================
+# BASE QUERY
+# Fetch product variants with related product, category,
+# main category, UOM, images & sub-category
+# =====================================================
 def product_variant_with_product_uom_query(db: Session):
     return (
         db.query(ProductVariants)
@@ -34,7 +37,11 @@ def product_variant_with_product_uom_query(db: Session):
 
 
 
-
+# =====================================================
+# LIST ALL PRODUCT VARIANTS (ZONE-BASED)
+# Used for website  product listing
+# Includes geo-location & category filtering
+# =====================================================
 def list_all_product_variants(
     db: Session,
     lat: float,

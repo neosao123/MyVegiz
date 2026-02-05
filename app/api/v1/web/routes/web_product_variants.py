@@ -18,7 +18,9 @@ from fastapi import Path
 router = APIRouter()
 
 
-
+# -------------------------
+# LIST for Product Variant
+# -------------------------
 @router.get(
     "/{main_category_slug}/list",
     response_model=PaginatedAPIResponse[List[ProductVariantResponse]]

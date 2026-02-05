@@ -5,7 +5,10 @@ from datetime import datetime
 import re
 
 
-
+# =====================================================
+# WEB CATEGORY – RESPONSE SCHEMA
+# Used for returning category data to web
+# =====================================================
 class CategoryResponse(BaseModel):
     id: int
     main_category_id: Optional[int] = None

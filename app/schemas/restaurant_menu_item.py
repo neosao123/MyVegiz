@@ -4,9 +4,10 @@ from typing import Optional
 from datetime import datetime
 
 
-# -------------------------
-# CREATE
-# -------------------------
+# =====================================================
+# MENU ITEM – CREATE SCHEMA
+# Used when creating a new menu item
+# =====================================================
 class MenuItemCreate(BaseModel):
     item: str
     sale_price: float
@@ -73,9 +74,10 @@ class MenuItemCreate(BaseModel):
         return v
 
 
-# -------------------------
-# UPDATE
-# -------------------------
+# =====================================================
+# MENU ITEM – UPDATE SCHEMA
+# Used when updating an existing menu item
+# =====================================================
 class MenuItemUpdate(BaseModel):
     item: Optional[str] = None
     sale_price: Optional[float] = None
@@ -119,9 +121,10 @@ class MenuItemUpdate(BaseModel):
         )
 
 
-# -------------------------
-# RESPONSE
-# -------------------------
+# =====================================================
+# MENU ITEM – RESPONSE SCHEMA
+# Used for API responses (create / list / update)
+# =====================================================
 class MenuItemResponse(BaseModel):
     id: int
     uu_id: str
@@ -145,7 +148,10 @@ class MenuItemResponse(BaseModel):
 
 
 
-
+# =====================================================
+# MENU DROPDOWN RESPONSE
+# Used for menu dropdown (id + menu name)
+# =====================================================
 class MenuDropdownResponse(BaseModel):
     id: int
     menu: str
@@ -154,6 +160,10 @@ class MenuDropdownResponse(BaseModel):
         orm_from_attributes = True
 
 
+# =====================================================
+# MENU CATEGORY DROPDOWN RESPONSE
+# Used for menu category dropdown by menu_id
+# =====================================================
 class MenuCategoryDropdownResponse(BaseModel):
     id: int
     menu_category: str

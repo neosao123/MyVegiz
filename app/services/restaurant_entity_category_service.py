@@ -8,6 +8,10 @@ from app.schemas.restaurant_entity_category import EntityCategoryCreate,EntityCa
 from app.core.exceptions import AppException
 
 
+# =====================================================
+# ENTITY CATEGORY CODE GENERATOR
+# Generates sequential unique codes like ECAT_1, ECAT_2
+# =====================================================
 def generate_entity_category_code(db: Session) -> str:
     last = (
         db.query(EntityCategory)
@@ -19,6 +23,9 @@ def generate_entity_category_code(db: Session) -> str:
     return f"ECAT_{next_id}"
 
 
+# =====================================================
+# CREATE ENTITY CATEGORY
+# =====================================================
 def create_entity_category(
     db: Session,
     data: EntityCategoryCreate
@@ -47,7 +54,10 @@ def create_entity_category(
     return entity
 
 
-
+# =====================================================
+# LIST ENTITY CATEGORIES (PAGINATED)
+# Optional filter by main_category_id
+# =====================================================
 def list_entity_categories(
     db: Session,
     offset: int,
@@ -71,7 +81,9 @@ def list_entity_categories(
 
 
 
-
+# =====================================================
+# UPDATE ENTITY CATEGORY
+# =====================================================
 def update_entity_category(
     db: Session,
     uu_id: str,
@@ -111,7 +123,9 @@ def update_entity_category(
     return entity
 
 
-
+# =====================================================
+# DELETE ENTITY CATEGORY (SOFT DELETE)
+# =====================================================
 def delete_entity_category(
     db: Session,
     uu_id: str

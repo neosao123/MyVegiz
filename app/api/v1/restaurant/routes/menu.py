@@ -20,7 +20,7 @@ router = APIRouter()
 
 
 # -------------------------
-# CREATE
+# CREATE Menu
 # -------------------------
 @router.post("/create", response_model=APIResponse[MenuResponse])
 def create_menu_api(
@@ -35,8 +35,9 @@ def create_menu_api(
     }
 
 
+
 # -------------------------
-# LIST
+# LIST for Menu
 # -------------------------
 @router.get("/list",response_model=PaginatedAPIResponse[list[MenuResponse]])
 def list_menu_api(
@@ -84,7 +85,7 @@ def list_menu_api(
 
 
 # -------------------------
-# UPDATE
+# UPDATE Menu
 # -------------------------
 @router.put("/update", response_model=APIResponse[MenuResponse])
 def update_menu_api(
@@ -100,8 +101,9 @@ def update_menu_api(
     }
 
 
+
 # -------------------------
-# DELETE
+# DELETE Menu
 # -------------------------
 @router.delete("/delete", response_model=APIResponse[MenuResponse])
 def delete_menu_api(
