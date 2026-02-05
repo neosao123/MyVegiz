@@ -1,5 +1,8 @@
 from pydantic import BaseModel, EmailStr, field_validator
 
+# ============================================================
+# WEB REGISTER REQUEST SCHEMA
+# ============================================================
 class WebRegisterRequest(BaseModel):
     name: str
     # email: EmailStr
@@ -23,13 +26,25 @@ class WebRegisterRequest(BaseModel):
 from pydantic import BaseModel
 from typing import Optional
 
+# ============================================================
+# MOBILE SIGN-IN REQUEST SCHEMA
+# ============================================================
 class MobileSignInRequest(BaseModel):
     mobile: str
 
+
+# ============================================================
+# MOBILE OTP VERIFY REQUEST SCHEMA
+# ============================================================
 class MobileOTPVerifyRequest(BaseModel):
     mobile: str
     otp: str
 
+
+
+# ============================================================
+# CUSTOMER RESPONSE SCHEMA
+# ============================================================
 class CustomerResponse(BaseModel):
     id: int
     uu_id: str
@@ -42,6 +57,10 @@ class CustomerResponse(BaseModel):
         orm_mode = True
 
 
+
+# ============================================================
+# OTP LOGIN RESPONSE SCHEMA
+# ============================================================
 class OTPResponse(BaseModel):
     access_token: str
     refresh_token: str

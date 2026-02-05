@@ -3,16 +3,20 @@ from sqlalchemy.orm import Session
 
 from app.api.dependencies import get_db
 from app.schemas.web_auth import WebRegisterRequest
-from app.services.web_auth_service import register_customer_send_otp,verify_otp_and_login
+from app.services.web_auth_service import register_customer_send_otp,verify_otp_and_login,send_otp, verify_otp
 from app.schemas.web_auth import (
     MobileSignInRequest,
     MobileOTPVerifyRequest,
     OTPResponse
 )
+from app.schemas.response import APIResponse
+
 router = APIRouter()
 
 
-
+# ============================================================
+# CUSTOMER REGISTRATION (SEND OTP)
+# ============================================================
 @router.post("/register")
 def register(payload: WebRegisterRequest, db: Session = Depends(get_db)):
     data = register_customer_send_otp(db, payload)
@@ -22,7 +26,9 @@ def register(payload: WebRegisterRequest, db: Session = Depends(get_db)):
         "data": {"mobile": data["mobile"]}
     }
 
-
+# ============================================================
+# CUSTOMER REGISTRATION (VERIFY OTP + LOGIN)
+# ============================================================
 @router.post("/register/verify-otp")
 def verify_otp(payload: MobileOTPVerifyRequest, db: Session = Depends(get_db)):
     data = verify_otp_and_login(db, payload.mobile, payload.otp)
@@ -34,21 +40,10 @@ def verify_otp(payload: MobileOTPVerifyRequest, db: Session = Depends(get_db)):
 
 
 
-from fastapi import APIRouter, Depends
-from sqlalchemy.orm import Session
 
-from app.api.dependencies import get_db
-from app.schemas.web_auth import (
-    MobileSignInRequest,
-    MobileOTPVerifyRequest,
-    OTPResponse
-)
-from app.services.web_auth_service import send_otp, verify_otp
-from app.schemas.response import APIResponse
-
-
-#sign In
-@router.post("/send-otp", response_model=APIResponse[dict])
+# ============================================================
+# SIGN-IN (SEND OTP)
+# ============================================================@router.post("/send-otp", response_model=APIResponse[dict])
 def request_otp(payload: MobileSignInRequest, db: Session = Depends(get_db)):
     otp_entry = send_otp(db, payload.mobile)
 
@@ -60,7 +55,9 @@ def request_otp(payload: MobileSignInRequest, db: Session = Depends(get_db)):
         }
     }
 
-
+# ============================================================
+# SIGN-IN (VERIFY OTP)
+# ============================================================
 @router.post("/verify-otp", response_model=APIResponse[OTPResponse | None])
 def verify_mobile_otp(
     payload: MobileOTPVerifyRequest,
