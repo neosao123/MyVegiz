@@ -3,13 +3,15 @@ from sqlalchemy.exc import IntegrityError
 import uuid
 
 from app.models.coupon_code import CouponCode
-from app.schemas.coupon_code import CouponCodeCreate
+from app.schemas.coupon_code import CouponCodeCreate,CouponCodeUpdate
 from app.core.exceptions import AppException
 
 from sqlalchemy.sql import func
-from app.schemas.coupon_code import CouponCodeUpdate
 
 
+# =========================================================
+# CREATE COUPON CODE
+# =========================================================
 def create_coupon_code(db: Session, data: CouponCodeCreate):
 
     # Duplicate coupon
@@ -42,7 +44,9 @@ def create_coupon_code(db: Session, data: CouponCodeCreate):
         db.rollback()
         raise AppException(500, "Database error")
 
-
+# =========================================================
+# LIST COUPON CODES (PAGINATED)
+# =========================================================
 def get_coupon_codes_paginated(
     db: Session,
     offset: int,
@@ -50,7 +54,7 @@ def get_coupon_codes_paginated(
 ):
     base_query = db.query(CouponCode).filter(
         CouponCode.is_delete == False,
-        CouponCode.is_active == True
+        # CouponCode.is_active == True
     ).order_by(CouponCode.created_at.desc())
 
     total_records = base_query.count()
@@ -61,6 +65,9 @@ def get_coupon_codes_paginated(
 
 
 
+# =========================================================
+# UPDATE COUPON CODE
+# =========================================================
 def update_coupon_code(
     db: Session,
     uu_id: str,
@@ -112,6 +119,9 @@ def update_coupon_code(
 
 
 
+# =========================================================
+# SOFT DELETE COUPON CODE
+# =========================================================
 def soft_delete_coupon_code(db: Session, uu_id: str):
     coupon = db.query(CouponCode).filter(
         CouponCode.uu_id == uu_id,

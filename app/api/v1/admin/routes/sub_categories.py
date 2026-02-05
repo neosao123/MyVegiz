@@ -9,7 +9,8 @@ from app.models.user import User
 from app.schemas.sub_category import (
     SubCategoryCreate,
     SubCategoryUpdate,
-    SubCategoryResponse
+    SubCategoryResponse,
+    CategoryDropdownResponse
 )
 from app.schemas.response import APIResponse, PaginatedAPIResponse
 from app.services.sub_category_service import (
@@ -19,11 +20,13 @@ from app.services.sub_category_service import (
     soft_delete_sub_category,
     get_category_dropdown
 )
-from app.schemas.sub_category import CategoryDropdownResponse
 
 router = APIRouter()
 
 
+# -------------------------------
+# create  SubCategoryCreate
+# -------------------------------
 @router.post("/create", response_model=APIResponse[SubCategoryResponse])
 def create_api(
     data: SubCategoryCreate = Depends(SubCategoryCreate.as_form),
@@ -34,7 +37,9 @@ def create_api(
     sub_category = create_sub_category(db, data, sub_category_image)
     return {"status": 201, "message": "Created successfully", "data": sub_category}
 
-
+# -------------------------------
+# list of SubCategoryCreate
+# -------------------------------
 @router.get("/list", response_model=PaginatedAPIResponse[List[SubCategoryResponse]])
 def list_api(
     page: int = Query(1, ge=1),
@@ -88,7 +93,9 @@ def list_api(
 
 
 
-
+# -------------------------------
+# update of SubCategoryCreate uu_id wise
+# -------------------------------
 @router.put("/update", response_model=APIResponse[SubCategoryResponse])
 def update_api(
     uu_id: str,
@@ -101,6 +108,9 @@ def update_api(
     return {"status": 200, "message": "Updated successfully", "data": sub_category}
 
 
+# -------------------------------
+# delete of SubCategoryCreate uu_id wise
+# -------------------------------
 @router.delete("/delete", response_model=APIResponse[SubCategoryResponse])
 def delete_api(
     uu_id: str,
@@ -112,7 +122,9 @@ def delete_api(
 
 
 
-
+# -------------------------------
+# dropdown of category_dropdown
+# -------------------------------
 @router.get(
     "/dropdown",
     response_model=APIResponse[List[CategoryDropdownResponse]]

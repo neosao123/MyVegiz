@@ -10,6 +10,9 @@ from app.services.profile_service import update_user_profile
 router = APIRouter()
 
 
+# -------------------------------
+# profile update for admin user 
+# -------------------------------
 @router.put("/profile_update", response_model=APIResponse[dict])
 def update_profile_api(
     user_data: UserUpdate = Depends(UserUpdate.as_form),

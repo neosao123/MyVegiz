@@ -11,7 +11,9 @@ from typing import Optional
 from datetime import datetime
 import re
 
-
+# -------------------------
+# COUPON CREATE SCHEMA
+# -------------------------
 class CouponCodeCreate(BaseModel):
     coupon_code: str
     coupon_type: str          # flat | percentile
@@ -136,6 +138,9 @@ class CouponCodeCreate(BaseModel):
     
 
 
+# -------------------------
+# COUPON RESPONSE SCHEMA
+# -------------------------
 class CouponCodeResponse(BaseModel):
     id: int
     uu_id: str
@@ -157,7 +162,9 @@ class CouponCodeResponse(BaseModel):
         orm_from_attributes = True
 
  
-
+# -------------------------
+# COUPON UPDATE SCHEMA
+# -------------------------
 class CouponCodeUpdate(BaseModel):
     coupon_code: Optional[str] = None
     coupon_type: Optional[str] = None        # flat | percentile

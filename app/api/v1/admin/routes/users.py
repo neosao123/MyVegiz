@@ -1,29 +1,19 @@
-from fastapi import APIRouter, Depends, status, UploadFile, File
+from fastapi import APIRouter, Depends, status, UploadFile, File,Query
 from sqlalchemy.orm import Session
 from typing import List
 
-from app.api.dependencies import get_db
-from app.schemas.user import UserCreate, UserResponse
+from app.api.dependencies import get_db,get_current_user
+from app.schemas.user import UserCreate, UserResponse,UserUpdate
 from app.schemas.response import APIResponse,PaginatedAPIResponse
-from app.services.user_service import create_user, get_users
-from fastapi import Depends
-
-
-from app.schemas.user import UserUpdate 
-from app.services.user_service import update_user
-from app.services.user_service import soft_delete_user
-
-
-from app.api.dependencies import get_current_user
+from app.services.user_service import create_user, get_users,update_user,soft_delete_user
 from app.models.user import User
-router = APIRouter()
-
-
-# Pagination
-from fastapi import Query
 import math
 
+router = APIRouter()
 
+# -------------------------------
+# create users for admin
+# -------------------------------
 @router.post("/create",response_model=APIResponse[UserResponse])
 def add_user(
     user: UserCreate = Depends(UserCreate.as_form),
@@ -38,7 +28,9 @@ def add_user(
         "data": user
     }
 
-
+# -------------------------------
+# list of admin users  
+# -------------------------------
 @router.get("/list",response_model=PaginatedAPIResponse[List[UserResponse]])
 def list_users(
     page: int = Query(1, ge=1),
@@ -106,6 +98,9 @@ def list_users(
 
 
 
+# -------------------------------
+# update of admin users uu_id wise  
+# -------------------------------
 @router.put("/update", response_model=APIResponse[UserResponse])
 def update_user_api(
     uu_id: str,  # ✅ STRING UUID
@@ -125,6 +120,9 @@ def update_user_api(
 
 
 
+# -------------------------------
+# delete of admin users uu_id wise  
+# -------------------------------
 @router.delete("/delete", response_model=APIResponse[UserResponse])
 def delete_user_api(
     uu_id: str,  # ✅ STRING UUID

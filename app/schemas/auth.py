@@ -1,6 +1,9 @@
 from pydantic import BaseModel, EmailStr, field_validator
 import re
 
+# -------------------------
+# LOGIN REQUEST SCHEMA
+# -------------------------
 class LoginRequest(BaseModel):
     email: EmailStr
     password: str
@@ -21,7 +24,9 @@ class LoginRequest(BaseModel):
             raise ValueError("Password must be at least 8 characters long")
         return value
 
-# 🔹 User info to return on login
+# -------------------------
+# USER DATA RETURNED ON LOGIN
+# -------------------------
 class UserLoginData(BaseModel):
     id: int
     email: EmailStr
@@ -32,12 +37,17 @@ class UserLoginData(BaseModel):
     uu_id:str
     is_active:bool
 
+# -------------------------
+# LOGIN RESPONSE SCHEMA
+# -------------------------
 class LoginResponse(BaseModel):
     access_token: str
     refresh_token: str
     token_type: str
     user: UserLoginData   #  login details
 
-
+# -------------------------
+# REFRESH TOKEN REQUEST
+# -------------------------
 class RefreshTokenRequest(BaseModel):
     refresh_token: str

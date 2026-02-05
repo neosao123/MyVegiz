@@ -9,12 +9,17 @@ from app.schemas.uom import UOMCreate, UOMUpdate
 from app.core.exceptions import AppException
 
 
+# ============================================================
+# UOM CODE GENERATOR
+# ============================================================
 def generate_uom_code(name: str) -> str:
     base = re.sub(r"[^A-Za-z0-9]+", "-", name.lower()).strip("-")
     return f"{base}-{uuid.uuid4().hex[:6]}"
 
 
-# ---------- CREATE ----------
+# ============================================================
+# CREATE UOM
+# ============================================================
 def create_uom(db: Session, uom: UOMCreate):
 
     # ---- NAME UNIQUE ----
@@ -59,8 +64,9 @@ def create_uom(db: Session, uom: UOMCreate):
         raise AppException(status=500, message="Database error while creating UOM")
 
 
-# ---------- LIST ----------
-
+# ============================================================
+# LIST UOMS
+# ============================================================
 def list_uoms(db: Session, offset: int, limit: int):
     # -------------------------------
     # Base filters (soft delete aware)
@@ -75,8 +81,9 @@ def list_uoms(db: Session, offset: int, limit: int):
 
     return total_records, uoms
 
-
-# ---------- UPDATE ----------
+# ============================================================
+# UPDATE UOM
+# ============================================================
 def update_uom(db: Session, uu_id: str, data: UOMUpdate):
     uom = db.query(UOM).filter(
         UOM.uu_id  == uu_id ,
@@ -134,7 +141,9 @@ def update_uom(db: Session, uu_id: str, data: UOMUpdate):
         raise AppException(status=500, message="Database error while updating UOM")
 
 
-# ---------- DELETE ----------
+# ============================================================
+# SOFT DELETE UOM
+# ============================================================
 def soft_delete_uom(db: Session, uu_id: str):
     uom = db.query(UOM).filter(
         UOM.uu_id  == uu_id ,

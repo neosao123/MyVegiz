@@ -18,7 +18,9 @@ from sqlalchemy.orm import joinedload
 MAX_IMAGE_SIZE = 1 * 1024 * 1024
 ALLOWED_TYPES = ["image/jpeg", "image/png", "image/jpg"]
 
-
+# =========================================================
+# IMAGE UPLOAD HANDLER
+# =========================================================
 def upload_product_image(file: UploadFile) -> str:
     if file.content_type not in ALLOWED_TYPES:
         raise AppException(status=400, message="Only JPG and PNG images are allowed")
@@ -38,12 +40,16 @@ def upload_product_image(file: UploadFile) -> str:
         "public_id": result["public_id"]
     }
 
-
+# =========================================================
+# SLUG GENERATOR
+# =========================================================
 def generate_slug(name: str) -> str:
     return re.sub(r"[^a-zA-Z0-9]+", "-", name.lower()).strip("-")
 
 
-# ---------- CREATE ----------
+# =========================================================
+# CREATE PRODUCT
+# =========================================================
 def create_product(
     db: Session,
     product: ProductCreate,
@@ -116,7 +122,9 @@ def create_product(
 
 
 
-
+# =========================================================
+# LIST PRODUCTS (PAGINATED)
+# =========================================================
 def list_products(db: Session, offset: int, limit: int):
     # -------------------------------
     # Base filters (soft delete aware)
@@ -133,9 +141,9 @@ def list_products(db: Session, offset: int, limit: int):
     return total_records, products
 
 
-# ---------- UPDATE ----------
-
-
+# =========================================================
+# UPDATE PRODUCT
+# =========================================================
 def update_product(
     db: Session,
     uu_id: str,
@@ -251,6 +259,10 @@ def update_product(
     ).filter(Product.id == product.id).first()
 
 
+
+# =========================================================
+# SOFT DELETE PRODUCT
+# =========================================================
 def soft_delete_product(db: Session, uu_id: str):
     product = db.query(Product).filter(
         Product.uu_id == uu_id,
@@ -286,11 +298,9 @@ def soft_delete_product(db: Session, uu_id: str):
     return product
 
 
-
-
-
-
-
+# =========================================================
+# CATEGORY DROPDOWN
+# =========================================================
 def get_category_dropdown(db: Session):
     return (
         db.query(Category)
@@ -305,11 +315,9 @@ def get_category_dropdown(db: Session):
 
 
 
-from app.models.category import Category
-from app.models.sub_category import SubCategory
-from app.core.exceptions import AppException
-
-
+# =========================================================
+# SUB-CATEGORY DROPDOWN (BY CATEGORY UUID)
+# =========================================================
 def get_sub_category_dropdown_by_category_uu_id(
     db: Session,
     category_uu_id: str

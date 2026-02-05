@@ -3,13 +3,21 @@ from fastapi import Form
 from typing import Optional
 
 
+# =========================================================
+# USER UPDATE SCHEMA
+# Used to update user profile information
+# All fields are optional
+# =========================================================
 class UserUpdate(BaseModel):
     name: Optional[str] = None
     email: Optional[str] = None
     contact: Optional[str] = None
     password: Optional[str] = None
 
-    # ---------- FORM SUPPORT ----------
+  # -----------------------------------------------------
+    # FORM SUPPORT
+    # Enables multipart/form-data submission
+    # -----------------------------------------------------
     @classmethod
     def as_form(
         cls,

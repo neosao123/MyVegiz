@@ -7,7 +7,13 @@ import re
 # Control what comes in and what goes out
 # Controls response format
 # Hides sensitive data
-
+# =========================================================
+# USER CREATE SCHEMA
+# Controls incoming user creation payload
+# - Validates input
+# - Supports form-data
+# - Prevents invalid / insecure data
+# =========================================================
 class UserCreate(BaseModel):
     name: str
     email: EmailStr
@@ -79,7 +85,11 @@ class UserCreate(BaseModel):
             raise ValueError("Password must be at least 8 characters long")
         return value
 
-
+# =========================================================
+# USER RESPONSE SCHEMA
+# Controls what data is sent back to the client
+# - Hides sensitive fields like password
+# =========================================================
 class UserResponse(BaseModel):
     id: int
     uu_id: str
@@ -96,7 +106,11 @@ class UserResponse(BaseModel):
 
 
 
-
+# =========================================================
+# USER UPDATE SCHEMA
+# Used for partial updates (PATCH-like behavior)
+# All fields are optional
+# =========================================================
 class UserUpdate(BaseModel):
     name: Optional[str] = None
     email: Optional[EmailStr] = None

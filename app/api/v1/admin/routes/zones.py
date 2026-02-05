@@ -7,13 +7,13 @@ from app.services.zone_service import (
     list_zones,
     update_zone,
     delete_zone,
-    list_all_deliverable_points
+    list_all_zone_polygons
 )
 from app.api.dependencies import get_current_user
 from app.models.user import User
 router = APIRouter()
 from app.schemas.response import APIResponse
-from app.schemas.zone import ZoneResponse,ZonePointResponse
+from app.schemas.zone import ZoneResponse,ZonePolygonResponse
 from app.services.zone_service import get_zones_by_lat_lng
 from app.schemas.response import PaginatedAPIResponse
 import math
@@ -136,19 +136,25 @@ def list_zones_by_lat_lng(
 
 
 
-
 @router.get(
-    "/points",
-    response_model=APIResponse[List[ZonePointResponse]]
+    "/polygons",
+    response_model=APIResponse[List[ZonePolygonResponse]]
 )
-def list_all_zone_points_api(
+def list_zone_polygons_api(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    points = list_all_deliverable_points(db)
+    zones = list_all_zone_polygons(db)
 
     return {
         "status": 200,
-        "message": "All deliverable zone points fetched successfully",
-        "data": points
+        "message": "Zone polygons fetched successfully",
+        "data": [
+            {
+                "zone_id": z.id,
+                "zone_name": z.zone_name,
+                "polygon": z.polygon
+            }
+            for z in zones
+        ]
     }

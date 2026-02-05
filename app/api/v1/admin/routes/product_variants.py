@@ -5,18 +5,17 @@ import math
 
 from app.api.dependencies import get_db, get_current_user
 from app.models.user import User
-from app.schemas.response import APIResponse
 from app.schemas.product_variant import ProductVariantBulkCreate,ProductVariantResponse,ZoneDropdownResponse,UOMDropdownResponse,ProductDropdownResponse
-
 from app.services.product_variant_service import bulk_create_product_variants,list_all_product_variants,update_product_variant,soft_delete_product_variant,list_uom_dropdown,list_zone_dropdown,list_product_dropdown
 from app.schemas.response import APIResponse, PaginatedAPIResponse
-from app.schemas.response import APIResponse
 
 
 
 router = APIRouter()
 
-
+# -------------------------------
+# product under multiple variants add bulk-create variants
+# -------------------------------
 @router.post(
     "/bulk-create",
     response_model=APIResponse[List[ProductVariantResponse]],
@@ -35,7 +34,9 @@ def bulk_create_variants_api(
         "data": variants
     }
 
-
+# -------------------------------
+# list of all product variants 
+# -------------------------------
 @router.get(
     "/list",
     response_model=PaginatedAPIResponse[List[ProductVariantResponse]]
@@ -86,7 +87,9 @@ def list_all_product_variants_api(
             "data": [],
         }
 
-
+# -------------------------------
+# update product variants uu_id wise
+# -------------------------------
 @router.put(
     "/update",
     response_model=APIResponse[ProductVariantResponse]
@@ -107,7 +110,9 @@ def update_variant_api(
 
 
 
-
+# -------------------------------
+# delete product variants uu_id wise
+# -------------------------------
 @router.delete(
     "/delete",
     response_model=APIResponse[ProductVariantResponse]
@@ -126,10 +131,9 @@ def delete_variant_api(
     }
 
 
-
-
-
-
+# -------------------------------
+# dropdown of zones
+# -------------------------------
 @router.get(
     "/zones",
     response_model=APIResponse[List[ZoneDropdownResponse]]
@@ -152,7 +156,9 @@ def zone_dropdown_api(
     }
 
 
-
+# -------------------------------
+# dropdown of uoms
+# -------------------------------
 @router.get(
     "/uoms",
     response_model=APIResponse[List[UOMDropdownResponse]]
@@ -175,7 +181,9 @@ def uom_dropdown_api(
     }
 
 
-
+# -------------------------------
+# dropdown of products
+# -------------------------------
 @router.get(
     "/products",
     response_model=APIResponse[List[ProductDropdownResponse]]

@@ -21,6 +21,9 @@ router = APIRouter()
 from fastapi import Query
 import math
 
+# -------------------------------
+# create uoms
+# -------------------------------
 @router.post("/create", response_model=APIResponse[UOMResponse])
 def add_uom(
     uom: UOMCreate = Depends(UOMCreate.as_form),
@@ -35,7 +38,9 @@ def add_uom(
     }
 
 
-
+# -------------------------------
+# list of uoms
+# -------------------------------
 @router.get("/list", response_model=PaginatedAPIResponse[List[UOMResponse]])
 def list_uoms_api(
     page: int = Query(1, ge=1),
@@ -93,6 +98,9 @@ def list_uoms_api(
 
 
 
+# -------------------------------
+# update uoms uu_id wise
+# -------------------------------
 @router.put("/update", response_model=APIResponse[UOMResponse])
 def update_uom_api(
     uu_id: str,
@@ -107,7 +115,9 @@ def update_uom_api(
         "data": result
     }
 
-
+# -------------------------------
+# delete uoms uu_id wise
+# -------------------------------
 @router.delete("/delete", response_model=APIResponse[UOMResponse])
 def delete_uom_api(
     uu_id: str,

@@ -5,12 +5,20 @@ from datetime import datetime
 import re
 
 
+# =========================================================
+# UOM CREATE SCHEMA
+# Used to create a new Unit of Measurement
+# =========================================================
 class UOMCreate(BaseModel):
     uom_name: str
     uom_short_name: str
     description: Optional[str] = None
     is_active: bool = True
 
+    # -----------------------------------------------------
+    # FORM SUPPORT
+    # Enables multipart/form-data submission
+    # -----------------------------------------------------
     @classmethod
     def as_form(
         cls,
@@ -50,6 +58,11 @@ class UOMCreate(BaseModel):
         return v.upper()
 
 
+# =========================================================
+# UOM UPDATE SCHEMA
+# Used to update existing UOM data
+# All fields are optional
+# =========================================================
 class UOMUpdate(BaseModel):
     uom_name: Optional[str] = None
     uom_short_name: Optional[str] = None
@@ -96,7 +109,10 @@ class UOMUpdate(BaseModel):
             return v.upper()
         return v
 
-
+# =========================================================
+# UOM RESPONSE SCHEMA
+# Used for API responses
+# =========================================================
 class UOMResponse(BaseModel):
     id: int
     uu_id: str

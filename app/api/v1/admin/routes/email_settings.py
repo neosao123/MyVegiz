@@ -18,6 +18,9 @@ from app.services.email_setting_service import (
 router = APIRouter(tags=["Email Settings"])
 
 
+# -------------------------------
+# create email_settings(first time)
+# -------------------------------
 @router.post("", response_model=APIResponse[EmailSettingResponse])
 def create_settings(
     payload: EmailSettingCreate = Depends(EmailSettingCreate.as_form),
@@ -31,6 +34,10 @@ def create_settings(
     }
 
 
+
+# -------------------------------
+# list email_settings 
+# -------------------------------
 @router.get("", response_model=APIResponse[EmailSettingResponse])
 def get_settings(db: Session = Depends(get_db)):
     data = get_email_settings(db)
@@ -41,6 +48,9 @@ def get_settings(db: Session = Depends(get_db)):
     }
 
 
+# -------------------------------
+# update email_settings 
+# -------------------------------
 @router.put("", response_model=APIResponse[EmailSettingResponse])
 def update_settings(
     payload: EmailSettingCreate = Depends(EmailSettingCreate.as_form),
@@ -53,7 +63,9 @@ def update_settings(
         "data": data
     }
 
-
+# -------------------------------
+# Test email 
+# -------------------------------
 @router.post("/test")
 def test_email(
     payload: TestEmailRequest = Depends(TestEmailRequest.as_form),

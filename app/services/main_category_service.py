@@ -17,6 +17,9 @@ MAX_IMAGE_SIZE = 1 * 1024 * 1024
 ALLOWED_TYPES = ["image/jpeg", "image/png", "image/jpg"]
 
 
+# =========================================================
+# IMAGE UPLOAD HANDLER
+# =========================================================
 def upload_main_category_image(file: UploadFile) -> str:
     if file.content_type not in ALLOWED_TYPES:
         raise AppException(400, "Only JPG and PNG images allowed")
@@ -32,12 +35,17 @@ def upload_main_category_image(file: UploadFile) -> str:
     )
     return result["secure_url"]
 
-
+# =========================================================
+# SLUG GENERATOR
+# =========================================================
 def generate_slug(name: str) -> str:
     return re.sub(r"[^a-zA-Z0-9]+", "-", name.lower()).strip("-")
 
 
-# ✅ CREATE
+
+# =========================================================
+# CREATE MAIN CATEGORY
+# =========================================================
 def create_main_category(
     db: Session,
     data: MainCategoryCreate,
@@ -68,7 +76,9 @@ def create_main_category(
         raise AppException(500, "Database error")
 
 
-
+# =========================================================
+# LIST MAIN CATEGORIES (PAGINATED)
+# =========================================================
 def list_main_categories(db: Session, offset: int, limit: int):
     # -------------------------------
     # Base filters (soft delete aware)
@@ -84,7 +94,9 @@ def list_main_categories(db: Session, offset: int, limit: int):
     return total_records, main_categories
 
 
-# ✅ UPDATE
+# =========================================================
+# UPDATE MAIN CATEGORY
+# =========================================================
 def update_main_category(
     db: Session,
     uu_id: str,

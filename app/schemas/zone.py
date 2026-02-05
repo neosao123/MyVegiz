@@ -4,7 +4,12 @@ from typing import Optional, List, Dict
 from datetime import datetime
 import json
 
-
+# =========================================================
+# ZONE CREATE SCHEMA
+# Used to create a delivery/service zone
+# - Accepts polygon as JSON string via form-data
+# - Validates polygon structure & uniqueness
+# =========================================================
 class ZoneCreate(BaseModel):
     zone_name: str
     city: str
@@ -32,6 +37,12 @@ class ZoneCreate(BaseModel):
             is_active=is_active,
         )
     
+    # -----------------------------------------------------
+    # POLYGON VALIDATION
+    # - Minimum 5 points
+    # - Each point must contain lat & lng
+    # - No duplicate coordinates allowed
+    # -----------------------------------------------------
     @field_validator("polygon")
     @classmethod
     def validate_polygon(cls, v):
@@ -52,6 +63,12 @@ class ZoneCreate(BaseModel):
 
 
 
+# =========================================================
+# ZONE UPDATE SCHEMA
+# Used for partial updates
+# - All fields optional
+# - Polygon validation only runs if provided
+# =========================================================
 class ZoneUpdate(BaseModel):
     zone_name: Optional[str] = None
     city: Optional[str] = None
@@ -103,6 +120,10 @@ class ZoneUpdate(BaseModel):
         return v
 
 
+# =========================================================
+# ZONE RESPONSE SCHEMA
+# Used when returning full zone details
+# =========================================================
 class ZoneResponse(BaseModel):
     id: int
     zone_name: str
@@ -116,7 +137,11 @@ class ZoneResponse(BaseModel):
     class Config:
         orm_from_attributes = True
 
-
-class ZonePointResponse(BaseModel):
-    lat: float
-    lng: float
+# =========================================================
+# ZONE POLYGON RESPONSE
+# Lightweight response for maps / frontend drawing
+# =========================================================
+class ZonePolygonResponse(BaseModel):
+    zone_id: int
+    zone_name: str
+    polygon: List[Dict[str, float]]

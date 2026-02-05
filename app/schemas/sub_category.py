@@ -3,12 +3,19 @@ from fastapi import Form
 from typing import Optional
 from datetime import datetime
 
-
+# =========================================================
+# SUB CATEGORY CREATE SCHEMA
+# Used to create a new sub-category under a category
+# =========================================================
 class SubCategoryCreate(BaseModel):
     category_id: int
     sub_category_name: str
     is_active: bool = True
 
+    # -----------------------------------------------------
+    # FORM SUPPORT
+    # Enables multipart/form-data submission
+    # -----------------------------------------------------
     @classmethod
     def as_form(
         cls,
@@ -29,7 +36,11 @@ class SubCategoryCreate(BaseModel):
             raise ValueError("Sub category name must be at least 3 characters")
         return v
 
-
+# =========================================================
+# SUB CATEGORY UPDATE SCHEMA
+# Used to update an existing sub-category
+# All fields are optional
+# =========================================================
 class SubCategoryUpdate(BaseModel):
     category_id: Optional[int] = None
     sub_category_name: Optional[str] = None
@@ -49,6 +60,10 @@ class SubCategoryUpdate(BaseModel):
         )
 
 
+# =========================================================
+# SUB CATEGORY RESPONSE SCHEMA
+# Used when returning sub-category data in API responses
+# =========================================================
 class SubCategoryResponse(BaseModel):
     id: int
     uu_id: str
@@ -64,6 +79,10 @@ class SubCategoryResponse(BaseModel):
         orm_from_attributes = True
 
 
+# =========================================================
+# CATEGORY DROPDOWN RESPONSE
+# Used for dropdowns (ID + Name only)
+# =========================================================
 class CategoryDropdownResponse(BaseModel):
     id: int
     category_name: str

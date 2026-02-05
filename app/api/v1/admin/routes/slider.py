@@ -2,27 +2,19 @@ from fastapi import APIRouter, Depends, UploadFile, File
 from sqlalchemy.orm import Session
 
 from app.api.dependencies import get_db, get_current_user
-from app.schemas.slider import SliderCreate, SliderResponse
-from app.schemas.response import APIResponse
-from app.services.slider_service import create_slider
+from app.schemas.slider import SliderCreate, SliderResponse,SliderUpdate
+from app.schemas.response import APIResponse,PaginatedAPIResponse
+from app.services.slider_service import create_slider,list_sliders,update_slider,soft_delete_slider
 from app.models.user import User
-
 from fastapi import Query
 import math
-from app.schemas.response import PaginatedAPIResponse
-from app.services.slider_service import list_sliders
-
-
-from app.schemas.slider import SliderUpdate
-from app.services.slider_service import update_slider
-
-from app.services.slider_service import soft_delete_slider
-
 
 
 router = APIRouter()
 
-
+# -------------------------------
+# create slider
+# -------------------------------
 @router.post("/create", response_model=APIResponse[SliderResponse])
 def create_slider_api(
     data: SliderCreate = Depends(SliderCreate.as_form),
@@ -47,7 +39,9 @@ def create_slider_api(
     }
 
 
-
+# -------------------------------
+# list of slider
+# -------------------------------
 @router.get("/list", response_model=PaginatedAPIResponse[list[SliderResponse]])
 def list_slider_api(
     page: int = Query(1, ge=1),
@@ -98,7 +92,9 @@ def list_slider_api(
         }
 
 
-
+# -------------------------------
+# update of slider slider_id wise
+# -------------------------------
 @router.put("/update", response_model=APIResponse[SliderResponse])
 def update_slider_api(
     slider_id: int,
@@ -126,6 +122,9 @@ def update_slider_api(
 
 
 
+# -------------------------------
+# delete of slider slider_id wise
+# -------------------------------
 @router.delete("/delete", response_model=APIResponse[SliderResponse])
 def delete_slider_api(
     slider_id: int,

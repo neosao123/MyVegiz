@@ -11,7 +11,9 @@ from sqlalchemy.sql import func
 MAX_IMAGE_SIZE = 1 * 1024 * 1024  # 1MB
 ALLOWED_TYPES = ["image/jpeg", "image/png", "image/jpg"]
 
-
+# ============================================================
+# UPLOAD SLIDER IMAGE (MOBILE / TAB / WEB)
+# ============================================================
 def upload_slider_image(file: UploadFile, folder: str) -> str:
     if file.content_type not in ALLOWED_TYPES:
         raise AppException(400, "Only JPG and PNG images allowed")
@@ -27,7 +29,9 @@ def upload_slider_image(file: UploadFile, folder: str) -> str:
     )
     return result["secure_url"]
 
-
+# ============================================================
+# CREATE SLIDER
+# ============================================================
 def create_slider(
     db: Session,
     data: SliderCreate,
@@ -61,7 +65,9 @@ def create_slider(
     return slider
 
 
-
+# ============================================================
+# LIST SLIDERS (PAGINATED)
+# ============================================================
 def list_sliders(db: Session, offset: int, limit: int):
     # -------------------------------
     # Base filters (soft delete aware)
@@ -80,6 +86,9 @@ def list_sliders(db: Session, offset: int, limit: int):
 
 
 
+# ============================================================
+# UPDATE SLIDER
+# ============================================================
 def update_slider(
     db: Session,
     slider_id: int,
@@ -123,8 +132,9 @@ def update_slider(
 
 
 
-
-
+# ============================================================
+# SOFT DELETE SLIDER
+# ============================================================
 def soft_delete_slider(db: Session, slider_id: int):
     slider = db.query(Slider).filter(
         Slider.id == slider_id,

@@ -3,14 +3,7 @@ from sqlalchemy.orm import Session
 from typing import List
 
 from app.api.dependencies import get_db, get_current_user
-from app.schemas.product import ProductCreate, ProductUpdate, ProductResponse
-from app.schemas.response import APIResponse
-from app.api.dependencies import get_db
-from app.schemas.product import (
-    ProductCreate,
-    ProductUpdate,
-    ProductResponse
-)
+from app.schemas.product import ProductCreate, ProductUpdate, ProductResponse,CategoryDropdownResponse,SubCategoryDropdownResponse,ProductImageResponse
 from app.schemas.response import APIResponse,PaginatedAPIResponse
 from app.services.product_service import (
     create_product,
@@ -22,17 +15,16 @@ from app.services.product_service import (
 from app.models.user import User
 from app.models.product import Product
 from app.models.product_image import ProductImage
-from app.schemas.product import CategoryDropdownResponse
-from app.schemas.product import SubCategoryDropdownResponse,ProductImageResponse
 from app.core.exceptions import AppException
-
-router = APIRouter()
-
-# Pagination
 from fastapi import Query
 import math
 
+router = APIRouter()
 
+
+# -------------------------------
+# create products
+# -------------------------------
 @router.post("/create", response_model=APIResponse[ProductResponse])
 def add_product(
     product: ProductCreate = Depends(ProductCreate.as_form),
@@ -44,7 +36,9 @@ def add_product(
     return {"status": 201, "message": "Product created successfully", "data": data}
 
 
-
+# -------------------------------
+# list of products
+# -------------------------------
 @router.get("/list", response_model=PaginatedAPIResponse[List[ProductResponse]])
 def list_products_api(
     page: int = Query(1, ge=1),
@@ -95,7 +89,9 @@ def list_products_api(
             }
 
 
-
+# -------------------------------
+# update products uu_id wise
+# -------------------------------
 @router.put("/update", response_model=APIResponse[ProductResponse])
 def update_product_api(
     uu_id: str,    
@@ -111,7 +107,9 @@ def update_product_api(
 
     return {"status": 200, "message": "Product updated successfully", "data": data}
 
-
+# -------------------------------
+# delete products uu_id wise
+# -------------------------------
 @router.delete("/delete", response_model=APIResponse[ProductResponse])
 def delete_product_api(
     uu_id: str,
@@ -123,6 +121,9 @@ def delete_product_api(
 
 
 
+# -------------------------------
+# dropdown of category 
+# -------------------------------
 @router.get(
     "/dropdown-category",
     response_model=APIResponse[List[CategoryDropdownResponse]]
@@ -148,6 +149,9 @@ def category_dropdown(
 
 
 
+# -------------------------------
+# dropdown of subcategory 
+# -------------------------------
 @router.get(
     "/dropdown-subcategory",
     response_model=APIResponse[List[SubCategoryDropdownResponse]]

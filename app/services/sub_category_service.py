@@ -16,6 +16,10 @@ from app.core.exceptions import AppException
 MAX_IMAGE_SIZE = 1 * 1024 * 1024
 ALLOWED_TYPES = ["image/jpeg", "image/png", "image/jpg"]
 
+
+# ============================================================
+# BASE QUERY WITH CATEGORY NAME JOIN
+# ============================================================
 def category_with_name_query(db):
     return (
         db.query(
@@ -33,7 +37,9 @@ def category_with_name_query(db):
         .filter(SubCategory.is_delete == False)
     )
 
-
+# ============================================================
+# UPLOAD SUB CATEGORY IMAGE
+# ============================================================
 def upload_sub_category_image(file: UploadFile) -> str:
     if file.content_type not in ALLOWED_TYPES:
         raise AppException(400, "Only JPG and PNG images allowed")
@@ -49,14 +55,17 @@ def upload_sub_category_image(file: UploadFile) -> str:
     )
     return result["secure_url"]
 
-
+# ============================================================
+# SLUG GENERATOR
+# ============================================================
 def generate_slug(name: str) -> str:
     return re.sub(r"[^a-zA-Z0-9]+", "-", name.lower()).strip("-")
 
 
-# =========================
-# CREATE
-# =========================
+
+# ============================================================
+# CREATE SUB CATEGORY
+# ============================================================
 def create_sub_category(
     db: Session,
     data: SubCategoryCreate,
@@ -105,9 +114,9 @@ def create_sub_category(
         raise AppException(500, "Database error")
 
 
-# =========================
-# LIST
-# =========================
+# ============================================================
+# LIST SUB CATEGORIES (PAGINATED)
+# ============================================================
 def list_sub_categories(db: Session, offset: int, limit: int):
     base_query = category_with_name_query(db).filter(
         # SubCategory.is_active == True
@@ -121,9 +130,10 @@ def list_sub_categories(db: Session, offset: int, limit: int):
 
 
 
-# =========================
-# UPDATE
-# =========================
+
+# ============================================================
+# UPDATE SUB CATEGORY
+# ============================================================
 def update_sub_category(
     db: Session,
     uu_id: str,
@@ -179,9 +189,11 @@ def update_sub_category(
         .filter(SubCategory.uu_id == uu_id)
         .first()
             )
-# =========================
-# DELETE (SOFT)
-# =========================
+
+
+# ============================================================
+# SOFT DELETE SUB CATEGORY
+# ============================================================
 def soft_delete_sub_category(db: Session, uu_id: str):
     sub_category = db.query(SubCategory).filter(
         SubCategory.uu_id == uu_id,
@@ -207,7 +219,9 @@ def soft_delete_sub_category(db: Session, uu_id: str):
 
 
 
-
+# ============================================================
+# CATEGORY DROPDOWN
+# ============================================================
 def get_category_dropdown(db: Session):
     return (
         db.query(Category)

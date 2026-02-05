@@ -5,11 +5,15 @@ from app.schemas.email_settings import EmailSettingCreate, TestEmailRequest
 from app.core.exceptions import AppException
 from app.core.mailer import send_email
 
-
+# =========================================================
+# GET EMAIL SETTINGS
+# =========================================================
 def get_email_settings(db: Session):
     return db.query(EmailSetting).first()
 
-
+# =========================================================
+# CREATE EMAIL SETTINGS (ONE-TIME SETUP)
+# =========================================================
 def create_email_settings(db: Session, data: EmailSettingCreate):
     existing = db.query(EmailSetting).first()
 
@@ -30,7 +34,9 @@ def create_email_settings(db: Session, data: EmailSettingCreate):
         db.rollback()
         raise AppException(status=500, message="Database error")
 
-
+# =========================================================
+# UPDATE EMAIL SETTINGS
+# =========================================================
 def update_email_settings(db: Session, data: EmailSettingCreate):
     settings = db.query(EmailSetting).first()
 
@@ -51,7 +57,9 @@ def update_email_settings(db: Session, data: EmailSettingCreate):
         raise AppException(status=500, message="Database error")
 
 
-
+# =========================================================
+# SEND TEST EMAIL
+# =========================================================
 def send_test_email(db: Session, payload: TestEmailRequest):
     settings = db.query(EmailSetting).first()
 

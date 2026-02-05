@@ -3,10 +3,18 @@ from fastapi import Form
 from datetime import datetime
 from typing import Optional
 
+# =========================================================
+# SLIDER CREATE SCHEMA
+# Used to create a new slider/banner
+# =========================================================
 class SliderCreate(BaseModel):
     caption: str
     is_active: bool = True
 
+    # -----------------------------------------------------
+    # FORM SUPPORT
+    # Enables multipart/form-data submission
+    # -----------------------------------------------------
     @classmethod
     def as_form(
         cls,
@@ -26,6 +34,11 @@ class SliderCreate(BaseModel):
         return v
 
 
+
+# =========================================================
+# SLIDER RESPONSE SCHEMA
+# Used when returning slider data in API responses
+# =========================================================
 class SliderResponse(BaseModel):
     id: int
     mobile_image: str
@@ -38,7 +51,11 @@ class SliderResponse(BaseModel):
     class Config:
         orm_from_attributes = True
 
-
+# =========================================================
+# SLIDER UPDATE SCHEMA
+# Used to update existing slider details
+# All fields are optional
+# =========================================================
 class SliderUpdate(BaseModel):
     caption: Optional[str] = None
     is_active: Optional[bool] = None

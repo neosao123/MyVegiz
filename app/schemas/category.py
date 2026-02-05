@@ -4,7 +4,9 @@ from typing import Optional
 from datetime import datetime
 import re
 
-
+# -------------------------
+# CATEGORY CREATE SCHEMA
+# -------------------------
 class CategoryCreate(BaseModel):
     main_category_id: int
     category_name: str
@@ -40,6 +42,9 @@ class CategoryCreate(BaseModel):
         return v
 
 
+# -------------------------
+# CATEGORY RESPONSE SCHEMA
+# -------------------------
 class CategoryResponse(BaseModel):
     id: int
     main_category_id: Optional[int] = None
@@ -55,7 +60,9 @@ class CategoryResponse(BaseModel):
         orm_from_attributes = True
 
 
-
+# -------------------------
+# CATEGORY UPDATE SCHEMA
+# -------------------------
 class CategoryUpdate(BaseModel):
     main_category_id: Optional[int] = None
     category_name: Optional[str] = None
@@ -85,7 +92,9 @@ class CategoryUpdate(BaseModel):
                 raise ValueError("Category name must be at least 3 characters long")
         return v
 
-
+# -------------------------
+# MAIN CATEGORY DROPDOWN RESPONSE
+# -------------------------
 class MainCategoryDropdownResponse(BaseModel):
     id: int
     main_category_name: str

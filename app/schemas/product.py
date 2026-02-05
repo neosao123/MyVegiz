@@ -5,7 +5,10 @@ from datetime import datetime
 import re
 from fastapi import Form, UploadFile, File
 
-
+# =========================================================
+# PRODUCT CREATE SCHEMA
+# Used while creating a new product with images
+# =========================================================
 class ProductCreate(BaseModel):
     category_id: int
     sub_category_id: Optional[int] = None  #  OPTIONAL
@@ -19,6 +22,10 @@ class ProductCreate(BaseModel):
     is_active: bool = True
     images: Optional[List[UploadFile]] = None  # ✅ NEW FIELD
 
+
+    # -------------------------
+    # FORM DATA HANDLER
+    # -------------------------
     @classmethod
     def as_form(
         cls,
@@ -80,7 +87,10 @@ class ProductCreate(BaseModel):
             raise ValueError("Maximum 5 images are allowed")
         return v
 
-
+# =========================================================
+# PRODUCT UPDATE SCHEMA
+# Used while updating product details
+# =========================================================
 class ProductUpdate(BaseModel):
     category_id: Optional[int] = None
     sub_category_id: Optional[int] = None
@@ -144,6 +154,10 @@ class ProductUpdate(BaseModel):
             raise ValueError("Maximum 5 images are allowed")
         return v
 
+
+# =========================================================
+# PRODUCT IMAGE RESPONSE
+# =========================================================
 class ProductImageResponse(BaseModel):
     product_image: str
     is_primary: bool
@@ -152,7 +166,9 @@ class ProductImageResponse(BaseModel):
     class Config:
         orm_from_attributes = True
 
-
+# =========================================================
+# CATEGORY RESPONSE (NESTED)
+# =========================================================
 class CategoryResponse(BaseModel):
     id: int
     category_name: str
@@ -160,7 +176,9 @@ class CategoryResponse(BaseModel):
     class Config:
         orm_from_attributes = True
 
-
+# =========================================================
+# SUB-CATEGORY RESPONSE (NESTED)
+# =========================================================
 class SubCategoryResponse(BaseModel):
     id: int
     sub_category_name: str
@@ -168,7 +186,9 @@ class SubCategoryResponse(BaseModel):
     class Config:
         orm_from_attributes = True
 
-
+# =========================================================
+# PRODUCT RESPONSE (FULL VIEW)
+# =========================================================
 class ProductResponse(BaseModel):
     uu_id: str
     # category_id: int
@@ -195,6 +215,9 @@ class ProductResponse(BaseModel):
 
 
 
+# =========================================================
+# CATEGORY DROPDOWN RESPONSE
+# =========================================================
 class CategoryDropdownResponse(BaseModel):
     id: int
     uu_id: str
@@ -205,6 +228,9 @@ class CategoryDropdownResponse(BaseModel):
 
 
 
+# =========================================================
+# SUB-CATEGORY DROPDOWN RESPONSE
+# =========================================================
 class SubCategoryDropdownResponse(BaseModel):
     id: int
     category_id: int 

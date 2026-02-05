@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends, UploadFile, File, Query
 from sqlalchemy.orm import Session
 import math
 
-from app.api.dependencies import get_db
+from app.api.dependencies import get_db,get_current_user
 from app.schemas.main_category import (
     MainCategoryCreate,
     MainCategoryUpdate,
@@ -16,12 +16,14 @@ from app.services.main_category_service import (
     list_main_categories,
     update_main_category
 )
-from app.api.dependencies import get_current_user
 from app.models.user import User
 
 router = APIRouter()
 
 
+# -------------------------------
+# create Main category
+# -------------------------------
 @router.post("/create", response_model=APIResponse[MainCategoryResponse])
 def create_api(
     data: MainCategoryCreate = Depends(MainCategoryCreate.as_form),
@@ -33,6 +35,9 @@ def create_api(
     return {"status": 201, "message": "Created successfully", "data": category}
 
 
+# -------------------------------
+# list of Main category
+# -------------------------------
 @router.get("/list", response_model=PaginatedAPIResponse[list[MainCategoryResponse]])
 def list_api(
     page: int = Query(1, ge=1),
@@ -83,6 +88,9 @@ def list_api(
             }
 
 
+# -------------------------------
+# update Main category uu_id wise
+# -------------------------------
 @router.put("/update", response_model=APIResponse[MainCategoryResponse])
 def update_api(
     uu_id: str,

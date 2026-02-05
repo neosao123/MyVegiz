@@ -4,11 +4,17 @@ from fastapi import Form
 from typing import Optional
 from datetime import datetime
 
-
+# -------------------------
+# CREATE MAIN CATEGORY
+# -------------------------
 class MainCategoryCreate(BaseModel):
     main_category_name: str
     is_active: bool = True
 
+    # -------------------------
+    # FORM SUPPORT
+    # Enables multipart/form-data submission
+    # -------------------------
     @classmethod
     def as_form(
         cls,
@@ -27,7 +33,9 @@ class MainCategoryCreate(BaseModel):
             raise ValueError("Main category name must be at least 3 characters")
         return v
 
-
+# -------------------------
+# UPDATE MAIN CATEGORY
+# -------------------------
 class MainCategoryUpdate(BaseModel):
     main_category_name: Optional[str] = None
     is_active: Optional[bool] = None
@@ -44,6 +52,10 @@ class MainCategoryUpdate(BaseModel):
         )
 
 
+
+# -------------------------
+# MAIN CATEGORY RESPONSE
+# -------------------------
 class MainCategoryResponse(BaseModel):
     id: int
     uu_id: str

@@ -7,6 +7,11 @@ from sqlalchemy.exc import IntegrityError
 from app.utils.geo import point_in_polygon
 from app.models.zone import Zone
 
+
+
+# ============================================================
+# POLYGON UNIQUENESS VALIDATION
+# ============================================================
 def validate_polygon_uniqueness(
     db: Session,
     polygon: list[dict],
@@ -34,6 +39,10 @@ def validate_polygon_uniqueness(
                     )
                 )
 
+
+# ============================================================
+# CREATE ZONE
+# ============================================================
 def create_zone(db: Session, data: ZoneCreate):
     validate_polygon_uniqueness(db, data.polygon)
 
@@ -52,7 +61,9 @@ def create_zone(db: Session, data: ZoneCreate):
     return zone
 
 
-
+# ============================================================
+# LIST ZONES (PAGINATED)
+# ============================================================
 def list_zones(db: Session, offset: int, limit: int):
     # -------------------------------
     # Base filters (soft delete aware)
@@ -69,6 +80,9 @@ def list_zones(db: Session, offset: int, limit: int):
     return total_records, zones
 
 
+# ============================================================
+# UPDATE ZONE
+# ============================================================
 def update_zone(db: Session, zone_id: int, data: ZoneUpdate):
     zone = db.query(Zone).filter(
         Zone.id == zone_id,
@@ -112,6 +126,9 @@ def update_zone(db: Session, zone_id: int, data: ZoneUpdate):
     return zone
 
 
+# ============================================================
+# SOFT DELETE ZONE
+# ============================================================
 def delete_zone(db: Session, zone_id: int):
     zone = db.query(Zone).filter(
         Zone.id == zone_id,
@@ -134,7 +151,9 @@ def delete_zone(db: Session, zone_id: int):
         db.rollback()
         raise AppException(status=500, message="Database error while deleting zone")
 
-
+# ============================================================
+# GET ZONES BY LAT / LNG
+# ============================================================
 def get_zones_by_lat_lng(db, lat: float, lng: float):
     zones = db.query(Zone).filter(
         Zone.is_delete == False,
@@ -151,21 +170,14 @@ def get_zones_by_lat_lng(db, lat: float, lng: float):
 
 
 
-def list_all_deliverable_points(db: Session):
+# ============================================================
+# LIST ALL ZONE POLYGONS
+# ============================================================
+def list_all_zone_polygons(db: Session):
     zones = db.query(Zone).filter(
         Zone.is_delete == False,
         Zone.is_active == True,
-        Zone.is_deliverable == True,
         Zone.polygon.isnot(None)
     ).all()
 
-    points = []
-
-    for zone in zones:
-        for p in zone.polygon:
-            points.append({
-                "lat": p["lat"],
-                "lng": p["lng"]
-            })
-
-    return points
+    return zones

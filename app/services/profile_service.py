@@ -13,6 +13,9 @@ MAX_IMAGE_SIZE = 1 * 1024 * 1024  # 1MB
 ALLOWED_TYPES = ["image/jpeg", "image/png", "image/jpg"]
 
 
+# ============================================================
+# UPLOAD PROFILE IMAGE TO CLOUDINARY
+# ============================================================
 def upload_profile_image(file: UploadFile) -> str:
     if file.content_type not in ALLOWED_TYPES:
         raise AppException(status=400, message="Only JPG and PNG images allowed")
@@ -28,7 +31,9 @@ def upload_profile_image(file: UploadFile) -> str:
     )
     return result["secure_url"]
 
-
+# ============================================================
+# UPDATE USER PROFILE
+# ============================================================
 def update_user_profile(
     db: Session,
     user: User,

@@ -24,6 +24,10 @@ import uuid
 MAX_IMAGE_SIZE = 1 * 1024 * 1024  # 1MB
 ALLOWED_TYPES = ["image/jpeg", "image/png", "image/jpg"]
 
+
+# ============================================================
+# PROFILE IMAGE UPLOAD (CLOUDINARY)
+# ============================================================
 def upload_profile_image(file: UploadFile) -> str:
     if file.content_type not in ALLOWED_TYPES:
         raise AppException(status=400, message="Only JPG and PNG images are allowed")
@@ -41,8 +45,9 @@ def upload_profile_image(file: UploadFile) -> str:
 
     return result["secure_url"]
 
-
-
+# ============================================================
+# CREATE USER
+# ============================================================
 def create_user(db: Session, user: UserCreate, profile_image: UploadFile = None):
 
 
@@ -115,11 +120,16 @@ def create_user(db: Session, user: UserCreate, profile_image: UploadFile = None)
         )
 
 
+# ============================================================
+# LIST USERS
+# ============================================================
 def get_users(db: Session):
     return db.query(User).filter(User.is_delete == False).all()
 
 
-
+# ============================================================
+# UPDATE USER
+# ============================================================
 def update_user(
     db: Session,
     uu_id: str,
@@ -195,9 +205,9 @@ def update_user(
         raise AppException(status=500, message="Database error while updating user")
 
 
-
-
-
+# ============================================================
+# SOFT DELETE USER
+# ============================================================
 def soft_delete_user(db: Session,  uu_id: str):
     user = db.query(User).filter(
         User.uu_id == uu_id,

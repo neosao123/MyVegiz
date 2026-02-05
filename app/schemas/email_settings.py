@@ -4,6 +4,9 @@ from typing import Optional
 from datetime import datetime
 
 
+# -------------------------
+# EMAIL SETTINGS CREATE
+# -------------------------
 class EmailSettingCreate(BaseModel):
     protocol: str
     host: str
@@ -14,6 +17,10 @@ class EmailSettingCreate(BaseModel):
     from_name: str
     from_email: EmailStr
 
+    # -------------------------
+    # FORM SUPPORT
+    # Allows multipart/form-data submission
+    # -------------------------
     @classmethod
     def as_form(
         cls,
@@ -37,7 +44,9 @@ class EmailSettingCreate(BaseModel):
             from_email=from_email,
         )
 
-
+# -------------------------
+# EMAIL SETTINGS RESPONSE
+# -------------------------
 class EmailSettingResponse(BaseModel):
     id: int
     protocol: str
@@ -54,6 +63,9 @@ class EmailSettingResponse(BaseModel):
         orm_from_attributes = True
 
 
+# -------------------------
+# TEST EMAIL REQUEST
+# -------------------------
 class TestEmailRequest(BaseModel):
     to_email: EmailStr
     subject: str

@@ -3,8 +3,10 @@ from typing import List,Optional
 from datetime import datetime
 
 
+
 # -------------------------
 # SINGLE VARIANT ITEM
+# Used inside bulk create payload
 # -------------------------
 class VariantItem(BaseModel):
     zone_id: int
@@ -16,6 +18,7 @@ class VariantItem(BaseModel):
 
 # -------------------------
 # BULK CREATE PAYLOAD
+# Used to create multiple variants for one product
 # -------------------------
 class ProductVariantBulkCreate(BaseModel):
     product_id: int
@@ -24,8 +27,8 @@ class ProductVariantBulkCreate(BaseModel):
 
 # -------------------------
 # RESPONSE SCHEMA
+# Used when returning variant details
 # -------------------------
-# app/schemas/product_variant.py
 
 class ProductVariantResponse(BaseModel):
     id: int
@@ -50,9 +53,9 @@ class ProductVariantResponse(BaseModel):
         orm_from_attributes = True
 
 
-
 # -------------------------
-# ZONE DROPDOWN
+# ZONE DROPDOWN RESPONSE
+# Used for UI dropdowns
 # -------------------------
 class ZoneDropdownResponse(BaseModel):
     zone_id: int
@@ -61,10 +64,9 @@ class ZoneDropdownResponse(BaseModel):
     class Config:
         orm_from_attributes = True
 
-
 # -------------------------
-# UOM DROPDOWN
-# -------------------------
+# UOM DROPDOWN RESPONSE
+# ------------------------
 class UOMDropdownResponse(BaseModel):
     uom_id: int
     uom_name: str
@@ -74,7 +76,7 @@ class UOMDropdownResponse(BaseModel):
 
 
 # -------------------------
-# PRODUCT DROPDOWN
+# PRODUCT DROPDOWN RESPONSE
 # -------------------------
 class ProductDropdownResponse(BaseModel):
     product_id: int

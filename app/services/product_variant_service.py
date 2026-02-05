@@ -8,10 +8,13 @@ from app.models.product import Product
 from app.models.uom import UOM
 from app.models.zone import Zone
 from app.schemas import product_variant
-from app.schemas.product_variant import ProductVariantBulkCreate
+from app.schemas.product_variant import ProductVariantBulkCreate,VariantItem
 from app.core.exceptions import AppException
+from sqlalchemy.orm import joinedload
 
-
+# ============================================================
+# BULK CREATE PRODUCT VARIANTS
+# ============================================================
 def bulk_create_product_variants(
     db: Session,
     data: ProductVariantBulkCreate
@@ -101,15 +104,9 @@ def bulk_create_product_variants(
         )
 
 
-
-
-
-import math
-from sqlalchemy.orm import Session
-from app.models.product_variants import ProductVariants
-from sqlalchemy.orm import joinedload
-
-
+# ============================================================
+# LIST ALL PRODUCT VARIANTS (PAGINATED)
+# ============================================================
 def list_all_product_variants(db: Session, offset: int, limit: int):
     # -------------------------------
     # Base filters (soft delete aware)
@@ -129,11 +126,10 @@ def list_all_product_variants(db: Session, offset: int, limit: int):
 
     return total_records, product_variants
 
-from app.schemas.product_variant import VariantItem
-from app.core.exceptions import AppException
-from sqlalchemy.exc import IntegrityError
 
-
+# ============================================================
+# UPDATE PRODUCT VARIANT
+# ============================================================
 def update_product_variant(
     db: Session,
     uu_id: str,
@@ -168,11 +164,9 @@ def update_product_variant(
         raise AppException(status=500, message="Failed to update variant")
 
 
-
-
-from sqlalchemy.sql import func
-
-
+# ============================================================
+# SOFT DELETE PRODUCT VARIANT
+# ============================================================
 def soft_delete_product_variant(
     db: Session,
     uu_id: str
@@ -197,12 +191,6 @@ def soft_delete_product_variant(
         db.rollback()
         raise AppException(status=500, message="Failed to delete variant")
 
-
-
-
-from sqlalchemy.orm import Session
-from app.models.zone import Zone
-from app.models.uom import UOM
 
 
 # -------------------------

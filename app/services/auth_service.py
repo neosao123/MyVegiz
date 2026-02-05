@@ -12,6 +12,12 @@ from app.core.security import (
 )
 from app.models.token_blacklist import TokenBlacklist
 
+# =========================================================
+# LOGIN USER
+# - Validates email & password
+# - Generates access & refresh tokens
+# - Returns user profile details
+# =========================================================
 def login_user(db: Session, email: str, password: str):
     user = db.query(User).filter(
         User.email == email,
@@ -53,6 +59,12 @@ def login_user(db: Session, email: str, password: str):
     }
 
 
+# =========================================================
+# REFRESH ACCESS TOKEN
+# - Validates refresh token
+# - Checks blacklist (logout / expiry)
+# - Issues new access token
+# =========================================================
 
 def refresh_access_token(refresh_token: str):
     blacklisted = db.query(TokenBlacklist).filter(

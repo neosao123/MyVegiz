@@ -1,28 +1,21 @@
 from fastapi import APIRouter, Depends, UploadFile, File
 from sqlalchemy.orm import Session
 from typing import List
-from fastapi import Request
-
-from app.api.dependencies import get_db
-from app.schemas.category import CategoryCreate, CategoryResponse,CategoryUpdate
+from fastapi import Request,Query
+import math
+from app.api.dependencies import get_db,get_current_user
+from app.schemas.category import CategoryCreate, CategoryResponse,CategoryUpdate,MainCategoryDropdownResponse
 from app.schemas.response import APIResponse,PaginatedAPIResponse
 from app.services.category_service import create_category,soft_delete_category,update_category,list_categories,get_main_category_dropdown
-
-
-
-from app.api.dependencies import get_current_user
 from app.models.user import User
 from app.models.category import Category
-from app.schemas.category import MainCategoryDropdownResponse
 
 router = APIRouter()
 
 
-# Pagination
-from fastapi import Query
-import math
-
-
+# -------------------------------
+# create category 
+# -------------------------------
 @router.post("/create", response_model=APIResponse[CategoryResponse])
 def add_category(
     category: CategoryCreate = Depends(CategoryCreate.as_form),
@@ -40,7 +33,9 @@ def add_category(
     }
 
 
-
+# -------------------------------
+# list of all categories
+# -------------------------------
 @router.get("/list", response_model=PaginatedAPIResponse[List[CategoryResponse]])
 def list_categories_api(
     page: int = Query(1, ge=1),
@@ -95,7 +90,9 @@ def list_categories_api(
 
 
 
-
+# -------------------------------
+# update category uu_id wise
+# -------------------------------
 @router.put("/update", response_model=APIResponse[CategoryResponse])
 def update_category_api(
     uu_id: str,  # query param
@@ -122,6 +119,10 @@ def update_category_api(
 
 
 
+
+# -------------------------------
+# delete category uu_id wise
+# -------------------------------
 @router.delete("/delete", response_model=APIResponse[CategoryResponse])
 def delete_category_api(
     uu_id: str,   # query parameter
@@ -138,7 +139,9 @@ def delete_category_api(
     }
 
 
-
+# -------------------------------
+# dropdown of main category 
+# -------------------------------
 @router.get(
     "/dropdown",
     response_model=APIResponse[List[MainCategoryDropdownResponse]]

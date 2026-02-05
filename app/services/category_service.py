@@ -6,18 +6,21 @@ import uuid
 import re
 
 from app.models.category import Category
-from app.schemas.category import CategoryCreate
+from app.schemas.category import CategoryCreate,CategoryUpdate
 from app.core.exceptions import AppException
 import cloudinary.uploader
 from app.models.main_category import MainCategory
 
 
-from app.schemas.category import CategoryUpdate
-
 
 MAX_IMAGE_SIZE = 1 * 1024 * 1024  # 1MB
 ALLOWED_TYPES = ["image/jpeg", "image/png", "image/jpg"]
 
+
+# =========================================================
+# BASE QUERY (CATEGORY + MAIN CATEGORY NAME)
+# Used for list & response formatting
+# =========================================================
 def category_with_main_name_query(db):
     return (
         db.query(
@@ -35,7 +38,9 @@ def category_with_main_name_query(db):
         .filter(Category.is_delete == False)
     )
 
-
+# =========================================================
+# IMAGE UPLOAD (CLOUDINARY)
+# =========================================================
 def upload_category_image(file: UploadFile) -> str:
     if file.content_type not in ALLOWED_TYPES:
         raise AppException(status=400, message="Only JPG and PNG images are allowed")
@@ -54,12 +59,18 @@ def upload_category_image(file: UploadFile) -> str:
     return result["secure_url"]
 
 
+# =========================================================
+# SLUG GENERATOR
+# =========================================================
 def generate_slug(name: str) -> str:
     slug = re.sub(r"[^a-zA-Z0-9]+", "-", name.lower()).strip("-")
     return slug
 
 
-# ---------- CREATE CATEGORY ----------
+
+# =========================================================
+# CREATE CATEGORY
+# =========================================================
 def create_category(
     db: Session,
     category: CategoryCreate,
@@ -119,8 +130,9 @@ def create_category(
         raise AppException(status=500, message="Database error while creating category")
 
 
-# ---------- LIST CATEGORIES ----------
-
+# =========================================================
+# LIST CATEGORIES (PAGINATED)
+# =========================================================
 def list_categories(db: Session, offset: int, limit: int):
     # -------------------------------
     # Base filters (soft delete aware)
@@ -141,6 +153,10 @@ def list_categories(db: Session, offset: int, limit: int):
 def generate_slug(name: str) -> str:
     return re.sub(r"[^a-zA-Z0-9]+", "-", name.lower()).strip("-")
 
+
+# =========================================================
+# UPDATE CATEGORY
+# =========================================================
 def update_category(
     db: Session,
     uu_id: str,
@@ -210,11 +226,9 @@ def update_category(
 
 
 
-
-
-
-
-
+# =========================================================
+# SOFT DELETE CATEGORY
+# =========================================================
 def soft_delete_category(db: Session, uu_id: str):
     category = db.query(Category).filter(
         Category.uu_id == uu_id,
@@ -244,7 +258,9 @@ def soft_delete_category(db: Session, uu_id: str):
 
 
 
-
+# =========================================================
+# MAIN CATEGORY DROPDOWN
+# =========================================================
 def get_main_category_dropdown(db: Session):
     return (
         db.query(MainCategory)

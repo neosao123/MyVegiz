@@ -47,7 +47,7 @@ from app.services.web_auth_service import send_otp, verify_otp
 from app.schemas.response import APIResponse
 
 
-
+#sign In
 @router.post("/send-otp", response_model=APIResponse[dict])
 def request_otp(payload: MobileSignInRequest, db: Session = Depends(get_db)):
     otp_entry = send_otp(db, payload.mobile)

@@ -1,30 +1,22 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
-
 from app.api.dependencies import get_db, get_current_user
-from app.schemas.coupon_code import CouponCodeCreate
-from app.schemas.response import APIResponse
-from app.services.coupon_code_service import create_coupon_code
+from app.schemas.coupon_code import CouponCodeCreate, CouponCodeResponse,CouponCodeUpdate
+from app.schemas.response import APIResponse,PaginatedAPIResponse
+from app.services.coupon_code_service import create_coupon_code,get_coupon_codes_paginated,update_coupon_code,soft_delete_coupon_code
 from app.models.user import User
-from app.schemas.coupon_code import CouponCodeResponse
-
 from fastapi import Query
 import math
 from typing import List
 
-from app.schemas.response import PaginatedAPIResponse
-from app.services.coupon_code_service import get_coupon_codes_paginated
-
-from app.schemas.coupon_code import CouponCodeUpdate
-from app.services.coupon_code_service import update_coupon_code
-
-from app.services.coupon_code_service import soft_delete_coupon_code
 
 
 
 router = APIRouter()
 
-
+# -------------------------------
+# Create code
+# -------------------------------
 @router.post("/create", response_model=APIResponse[CouponCodeResponse])
 def create_api(
     data: CouponCodeCreate = Depends(CouponCodeCreate.as_form),
@@ -39,7 +31,9 @@ def create_api(
     }
 
 
-
+# -------------------------------
+# Create Coupon code list
+# -------------------------------
 @router.get("/list", response_model=PaginatedAPIResponse[List[CouponCodeResponse]])
 def list_coupon_codes(
     page: int = Query(1, ge=1),
@@ -90,6 +84,9 @@ def list_coupon_codes(
 
 
 
+# -------------------------------
+# Update code uu_id wise
+# -------------------------------
 @router.put("/update", response_model=APIResponse[CouponCodeResponse])
 def update_coupon_api(
     uu_id: str,
@@ -107,6 +104,9 @@ def update_coupon_api(
 
 
 
+# -------------------------------
+# Delete Coupon code uu_id wise
+# -------------------------------
 @router.delete("/delete", response_model=APIResponse[CouponCodeResponse])
 def delete_coupon_code_api(
     uu_id: str,
