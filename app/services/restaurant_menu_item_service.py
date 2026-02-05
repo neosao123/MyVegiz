@@ -15,10 +15,17 @@ from app.models.menu import Menu
 from app.models.menu_category import MenuCategory
 
 
-
+# =====================================================
+# IMAGE UPLOAD CONFIGURATION
+# =====================================================
 MAX_IMAGE_SIZE = 1 * 1024 * 1024
 ALLOWED_TYPES = ["image/jpeg", "image/png", "image/jpg"]
 
+
+# =====================================================
+# MENU ITEM IMAGE UPLOAD
+# Validates image type & size before uploading to Cloudinary
+# =====================================================
 def upload_menu_item_image(file: UploadFile) -> str:
     if file.content_type not in ALLOWED_TYPES:
         raise AppException(400, "Only JPG and PNG images allowed")
@@ -35,18 +42,19 @@ def upload_menu_item_image(file: UploadFile) -> str:
     return result["secure_url"]
 
 
-# -------------------------
-# CODE GENERATOR
-# -------------------------
+# =====================================================
+# MENU ITEM CODE GENERATOR
+# Generates sequential codes like ITEM_1, ITEM_2
+# =====================================================
 def generate_menu_item_code(db: Session) -> str:
     last = db.query(MenuItem).order_by(MenuItem.id.desc()).first()
     next_id = last.id + 1 if last else 1
     return f"ITEM_{next_id}"
 
 
-# -------------------------
-# CREATE
-# -------------------------
+# =====================================================
+# CREATE MENU ITEM
+# =====================================================
 def create_menu_item(
     db: Session,
     data: MenuItemCreate,
@@ -120,9 +128,10 @@ def create_menu_item(
     return item
 
 
-# -------------------------
-# LIST
-# -------------------------
+# =====================================================
+# LIST MENU ITEMS (PAGINATED)
+# Optional filter by menu_id
+# =====================================================
 def list_menu_items(
     db: Session,
     offset: int,
@@ -142,9 +151,9 @@ def list_menu_items(
     return total_records, data
 
 
-# -------------------------
-# UPDATE
-# -------------------------
+# =====================================================
+# UPDATE MENU ITEM
+# =====================================================
 def update_menu_item(
     db: Session,
     uu_id: str,
@@ -206,9 +215,9 @@ def update_menu_item(
 
 
 
-# -------------------------
-# DELETE (SOFT)
-# -------------------------
+# =====================================================
+# DELETE MENU ITEM (SOFT DELETE)
+# =====================================================
 def delete_menu_item(db: Session, uu_id: str):
     item = db.query(MenuItem).filter(
         MenuItem.uu_id == uu_id,
@@ -229,9 +238,10 @@ def delete_menu_item(db: Session, uu_id: str):
 
 
 
-# -------------------------
+# =====================================================
 # MENU DROPDOWN
-# -------------------------
+# Returns active & non-deleted menus for dropdowns
+# =====================================================
 def get_menu_dropdown(db: Session):
     return db.query(Menu).filter(
         Menu.is_delete == False,
@@ -239,9 +249,10 @@ def get_menu_dropdown(db: Session):
     ).order_by(Menu.priority.asc(), Menu.menu.asc()).all()
 
 
-# -------------------------
-# MENU CATEGORY DROPDOWN
-# -------------------------
+# =====================================================
+# MENU CATEGORY DROPDOWN (BY MENU ID)
+# Returns active categories under a specific menu
+# =====================================================
 def get_menu_category_dropdown(db: Session, menu_id: int):
     return db.query(MenuCategory).filter(
         MenuCategory.menu_id == menu_id,

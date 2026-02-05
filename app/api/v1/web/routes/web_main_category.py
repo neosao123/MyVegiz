@@ -10,6 +10,9 @@ from app.services.web_main_category_service import list_web_main_categories
 router = APIRouter()
 
 
+# -------------------------
+# LIST for Main Category
+# -------------------------
 @router.get(
     "/list",
     response_model=PaginatedAPIResponse[list[WebMainCategoryResponse]]

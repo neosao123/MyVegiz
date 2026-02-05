@@ -6,6 +6,9 @@ from datetime import datetime
 import re
 
 
+# =====================================================
+# PRODUCT IMAGE RESPONSE
+# =====================================================
 class ProductImageResponse(BaseModel):
     product_image: str
     is_primary: bool
@@ -14,7 +17,10 @@ class ProductImageResponse(BaseModel):
         orm_from_attributes = True
 
         
-
+# =====================================================
+# PRODUCT RESPONSE (WEB)
+# Main product response for web APIs
+# =====================================================
 class ProductResponse(BaseModel):
     uu_id: str
     category_id: int

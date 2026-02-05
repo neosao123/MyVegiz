@@ -7,9 +7,10 @@ from app.schemas.restaurant_menu import MenuCreate, MenuUpdate
 from app.core.exceptions import AppException
 
 
-# -------------------------
-# CODE GENERATOR
-# -------------------------
+# =====================================================
+# MENU CODE GENERATOR
+# Generates sequential menu codes like MENU_1, MENU_2
+# =====================================================
 def generate_menu_code(db: Session) -> str:
     last = db.query(Menu).order_by(Menu.id.desc()).first()
     next_id = last.id + 1 if last else 1
@@ -17,7 +18,7 @@ def generate_menu_code(db: Session) -> str:
 
 
 # -------------------------
-# CREATE
+# CREATE MENU
 # -------------------------
 def create_menu(db: Session, data: MenuCreate):
     exists = db.query(Menu).filter(
@@ -42,9 +43,10 @@ def create_menu(db: Session, data: MenuCreate):
     return menu
 
 
-# -------------------------
-# LIST
-# -------------------------
+# =====================================================
+# LIST MENUS (PAGINATED)
+# Returns non-deleted menus ordered by priority
+# =====================================================
 def list_menus(db: Session, offset: int, limit: int):
     base_query = db.query(Menu).filter(
         Menu.is_delete == False
@@ -56,9 +58,9 @@ def list_menus(db: Session, offset: int, limit: int):
     return total_records, data
 
 
-# -------------------------
-# UPDATE
-# -------------------------
+# =====================================================
+# UPDATE MENU
+# =====================================================
 def update_menu(db: Session, uu_id: str, data: MenuUpdate):
     menu = db.query(Menu).filter(
         Menu.uu_id == uu_id,
@@ -93,9 +95,9 @@ def update_menu(db: Session, uu_id: str, data: MenuUpdate):
     return menu
 
 
-# -------------------------
-# DELETE (SOFT)
-# -------------------------
+# =====================================================
+# DELETE MENU (SOFT DELETE)
+# =====================================================
 def delete_menu(db: Session, uu_id: str):
     menu = db.query(Menu).filter(
         Menu.uu_id == uu_id,

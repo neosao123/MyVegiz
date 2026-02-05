@@ -2,6 +2,10 @@ from sqlalchemy.orm import Session
 from app.models.main_category import MainCategory
 
 
+# =====================================================
+# LIST WEB MAIN CATEGORIES (PAGINATED)
+# Used for website main category listing
+# =====================================================
 def list_web_main_categories(db: Session, offset: int, limit: int):
     base_query = db.query(MainCategory).filter(
         MainCategory.is_active == True
