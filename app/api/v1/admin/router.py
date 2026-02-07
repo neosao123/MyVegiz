@@ -17,7 +17,8 @@ from app.api.v1.admin.routes import (
     product_variants,
     profile_update,
     slider,
-    coupon_code
+    coupon_code,
+    site_cms
 )
 
 # -------------------------
@@ -67,4 +68,7 @@ router.include_router(slider.router, prefix="/slider")
 
 # Coupon Code ROUTES
 router.include_router(coupon_code.router, prefix="/coupon_code")
+
+# SITE CMS ROUTES
+router.include_router(site_cms.router, prefix="/site_cms", tags=["Site CMS"])
 
