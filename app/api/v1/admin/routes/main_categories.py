@@ -14,7 +14,8 @@ from app.schemas.response import APIResponse, PaginatedAPIResponse
 from app.services.main_category_service import (
     create_main_category,
     list_main_categories,
-    update_main_category
+    update_main_category,
+    search_main_categories
 )
 from app.models.user import User
 
@@ -42,6 +43,7 @@ def create_api(
 def list_api(
     page: int = Query(1, ge=1),
     limit: int = Query(10, ge=1),
+    q: str | None = Query(None, description="Search main category"),
     db: Session = Depends(get_db),
     user: User = Depends(get_current_user)
 ):
@@ -51,10 +53,16 @@ def list_api(
         # -------------------------------
         offset = (page - 1) * limit
 
-        # -------------------------------
-        # Fetch sliders
-        # -------------------------------
-        total_records, main_categories = list_main_categories(db, offset, limit)
+        if q:
+            total_records, main_categories = search_main_categories(
+                db=db,
+                search=q,
+                offset=offset,
+                limit=limit
+            )
+        else:
+
+            total_records, main_categories = list_main_categories(db, offset, limit)
 
         total_pages = math.ceil(total_records / limit) if limit else 1
 

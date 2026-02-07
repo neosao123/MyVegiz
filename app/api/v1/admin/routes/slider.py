@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 from app.api.dependencies import get_db, get_current_user
 from app.schemas.slider import SliderCreate, SliderResponse,SliderUpdate
 from app.schemas.response import APIResponse,PaginatedAPIResponse
-from app.services.slider_service import create_slider,list_sliders,update_slider,soft_delete_slider
+from app.services.slider_service import create_slider,list_sliders,update_slider,soft_delete_slider,search_sliders
 from app.models.user import User
 from fastapi import Query
 import math
@@ -46,6 +46,7 @@ def create_slider_api(
 def list_slider_api(
     page: int = Query(1, ge=1),
     limit: int = Query(10, ge=1),
+    q: str | None = Query(None, description="Search by caption"),
     db: Session = Depends(get_db),
     user: User = Depends(get_current_user)
 ):
@@ -55,10 +56,15 @@ def list_slider_api(
         # -------------------------------
         offset = (page - 1) * limit
 
-        # -------------------------------
-        # Fetch sliders
-        # -------------------------------
-        total_records, sliders = list_sliders(db, offset, limit)
+        if q:
+            total_records, sliders = search_sliders(
+                db=db,
+                search=q,
+                offset=offset,
+                limit=limit
+            )
+        else:
+            total_records, sliders = list_sliders(db, offset, limit)
 
         total_pages = math.ceil(total_records / limit) if limit else 1
 

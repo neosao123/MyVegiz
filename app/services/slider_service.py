@@ -8,6 +8,35 @@ from app.core.exceptions import AppException
 
 from sqlalchemy.sql import func
 
+
+
+from sqlalchemy import or_
+
+def search_sliders(
+    db: Session,
+    search: str,
+    offset: int,
+    limit: int
+):
+    query = db.query(Slider).filter(
+        Slider.is_delete == False,
+        Slider.is_active == True,
+        Slider.caption.ilike(f"%{search}%")
+    )
+
+    total_records = query.count()
+
+    sliders = (
+        query
+        .order_by(Slider.created_at.desc())
+        .offset(offset)
+        .limit(limit)
+        .all()
+    )
+
+    return total_records, sliders
+
+
 MAX_IMAGE_SIZE = 1 * 1024 * 1024  # 1MB
 ALLOWED_TYPES = ["image/jpeg", "image/png", "image/jpg"]
 

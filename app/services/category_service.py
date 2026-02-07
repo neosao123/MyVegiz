@@ -12,6 +12,61 @@ import cloudinary.uploader
 from app.models.main_category import MainCategory
 
 
+from app.core.search import apply_trigram_search
+
+def search_categories(
+    db: Session,
+    search: str,
+    offset: int,
+    limit: int
+):
+    # Base query (same columns as list)
+    query = (
+        db.query(
+            Category.id,
+            Category.main_category_id,
+            MainCategory.main_category_name.label("main_category_name"),
+            Category.uu_id,
+            Category.category_name,
+            Category.slug,
+            Category.category_image,
+            Category.is_active,
+            Category.created_at,
+        )
+        .join(MainCategory, MainCategory.id == Category.main_category_id)
+        .filter(
+            Category.is_delete == False
+        )
+    )
+
+    # 🔍 Apply trigram search
+    query = apply_trigram_search(
+        query=query,
+        search=search,
+        fields=[
+            Category.category_name,
+            MainCategory.main_category_name
+        ],
+        order_fields=[
+            Category.category_name,
+            MainCategory.main_category_name
+        ]
+    )
+
+    total = query.count()
+
+    categories = (
+        query
+        .order_by(Category.created_at.desc())
+        .offset(offset)
+        .limit(limit)
+        .all()
+    )
+
+    return total, categories
+
+
+
 
 MAX_IMAGE_SIZE = 1 * 1024 * 1024  # 1MB
 ALLOWED_TYPES = ["image/jpeg", "image/png", "image/jpg"]

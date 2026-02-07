@@ -12,6 +12,66 @@ from app.schemas.product_variant import ProductVariantBulkCreate,VariantItem
 from app.core.exceptions import AppException
 from sqlalchemy.orm import joinedload
 
+
+
+from sqlalchemy.orm import joinedload
+from sqlalchemy import or_
+from app.core.search import apply_trigram_search
+
+
+# ============================================================
+# SEARCH FUNCTIONALITY
+# ============================================================
+def search_product_variants(
+    db: Session,
+    search: str,
+    offset: int,
+    limit: int
+):
+    query = (
+        db.query(ProductVariants)
+        .join(Product, Product.id == ProductVariants.product_id)
+        .join(Zone, Zone.id == ProductVariants.zone_id)
+        .join(UOM, UOM.id == ProductVariants.uom_id)
+        .options(
+            joinedload(ProductVariants.product),
+            joinedload(ProductVariants.zone),
+            joinedload(ProductVariants.uom)
+        )
+        .filter(
+            ProductVariants.is_delete == False
+        )
+    )
+
+    # Trigram-based search across related tables
+    query = apply_trigram_search(
+        query=query,
+        search=search,
+        fields=[
+            Product.product_name,
+            Zone.zone_name,
+            UOM.uom_name
+        ],
+        order_fields=[
+            Product.product_name,
+            Zone.zone_name,
+            UOM.uom_name
+        ]
+    )
+
+    total = query.count()
+
+    variants = (
+        query
+        .order_by(ProductVariants.created_at.desc())
+        .offset(offset)
+        .limit(limit)
+        .all()
+    )
+
+    return total, variants
+
+
 # ============================================================
 # BULK CREATE PRODUCT VARIANTS
 # ============================================================

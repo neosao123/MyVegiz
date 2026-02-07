@@ -12,6 +12,60 @@ from app.models.category import Category
 from app.schemas.sub_category import SubCategoryCreate, SubCategoryUpdate
 from app.core.exceptions import AppException
 
+from app.core.search import apply_trigram_search
+
+
+def search_sub_categories(
+    db: Session,
+    search: str,
+    offset: int,
+    limit: int
+):
+    query = (
+        db.query(
+            SubCategory.id,
+            SubCategory.category_id,
+            Category.category_name.label("category_name"),
+            SubCategory.uu_id,
+            SubCategory.sub_category_name,
+            SubCategory.slug,
+            SubCategory.sub_category_image,
+            SubCategory.is_active,
+            SubCategory.created_at,
+        )
+        .join(Category, Category.id == SubCategory.category_id)
+        .filter(
+            SubCategory.is_delete == False
+        )
+    )
+
+    # Apply trigram search
+    query = apply_trigram_search(
+        query=query,
+        search=search,
+        fields=[
+            SubCategory.sub_category_name,
+            Category.category_name
+        ],
+        order_fields=[
+            SubCategory.sub_category_name,
+            Category.category_name
+        ]
+    )
+
+    total = query.count()
+
+    sub_categories = (
+        query
+        .order_by(SubCategory.created_at.desc())
+        .offset(offset)
+        .limit(limit)
+        .all()
+    )
+
+    return total, sub_categories
+
+
 
 MAX_IMAGE_SIZE = 1 * 1024 * 1024
 ALLOWED_TYPES = ["image/jpeg", "image/png", "image/jpg"]

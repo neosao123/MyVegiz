@@ -9,6 +9,56 @@ from app.schemas.uom import UOMCreate, UOMUpdate
 from app.core.exceptions import AppException
 
 
+from app.core.search import apply_trigram_search
+
+
+# ============================================================
+# SEARCH FUNCTIONALITY
+# ============================================================
+def search_uoms(
+    db: Session,
+    search: str,
+    offset: int,
+    limit: int
+):
+    query = (
+        db.query(UOM)
+        .filter(
+            UOM.is_delete == False
+        )
+    )
+
+    # 🔍 Trigram similarity search
+    query = apply_trigram_search(
+        query=query,
+        search=search,
+        fields=[
+            UOM.uom_name,
+            UOM.uom_code,
+            UOM.uom_short_name,
+            UOM.description
+        ],
+        order_fields=[
+            UOM.uom_name,
+            UOM.uom_code,
+            UOM.uom_short_name
+        ]
+    )
+
+    total = query.count()
+
+    uoms = (
+        query
+        .order_by(UOM.created_at.desc())
+        .offset(offset)
+        .limit(limit)
+        .all()
+    )
+
+    return total, uoms
+
+
+
 # ============================================================
 # UOM CODE GENERATOR
 # ============================================================

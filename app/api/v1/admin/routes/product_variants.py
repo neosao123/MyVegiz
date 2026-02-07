@@ -6,7 +6,7 @@ import math
 from app.api.dependencies import get_db, get_current_user
 from app.models.user import User
 from app.schemas.product_variant import ProductVariantBulkCreate,ProductVariantResponse,ZoneDropdownResponse,UOMDropdownResponse,ProductDropdownResponse
-from app.services.product_variant_service import bulk_create_product_variants,list_all_product_variants,update_product_variant,soft_delete_product_variant,list_uom_dropdown,list_zone_dropdown,list_product_dropdown
+from app.services.product_variant_service import bulk_create_product_variants,list_all_product_variants,update_product_variant,soft_delete_product_variant,list_uom_dropdown,list_zone_dropdown,list_product_dropdown,search_product_variants
 from app.schemas.response import APIResponse, PaginatedAPIResponse
 
 
@@ -44,6 +44,7 @@ def bulk_create_variants_api(
 def list_all_product_variants_api(
     page: int = Query(1, ge=1),
     limit: int = Query(10, ge=1),
+    q: str | None = Query(None, description="Search by product, zone or uom"),
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
@@ -51,10 +52,15 @@ def list_all_product_variants_api(
 
         offset = (page - 1) * limit
 
-        # -------------------------------
-        # Fetch sliders
-        # -------------------------------
-        total_records, variants = list_all_product_variants(db, offset, limit)
+        if q:
+            total_records, variants = search_product_variants(
+                db=db,
+                search=q,
+                offset=offset,
+                limit=limit
+            )
+        else:
+            total_records, variants = list_all_product_variants(db, offset, limit)
 
         total_pages = math.ceil(total_records / limit) if limit else 1
 

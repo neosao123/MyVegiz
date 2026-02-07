@@ -18,7 +18,8 @@ from app.services.sub_category_service import (
     list_sub_categories,
     update_sub_category,
     soft_delete_sub_category,
-    get_category_dropdown
+    get_category_dropdown,
+    search_sub_categories
 )
 
 router = APIRouter()
@@ -44,6 +45,7 @@ def create_api(
 def list_api(
     page: int = Query(1, ge=1),
     limit: int = Query(10, ge=1),
+    q: str | None = Query(None, description="Search sub category"),
     db: Session = Depends(get_db),
     user: User = Depends(get_current_user)
 ):
@@ -55,10 +57,15 @@ def list_api(
         # -------------------------------
         offset = (page - 1) * limit
 
-        # -------------------------------
-        # Fetch sliders
-        # -------------------------------
-        total_records, sub_categories = list_sub_categories(db, offset, limit)
+        if q:
+            total_records, sub_categories = search_sub_categories(
+                db=db,
+                search=q,
+                offset=offset,
+                limit=limit
+            )
+        else:
+            total_records, sub_categories = list_sub_categories(db, offset, limit)
 
         total_pages = math.ceil(total_records / limit) if limit else 1
 
@@ -90,7 +97,6 @@ def list_api(
             "message": "Failed to fetch sub categories",
             "data": [],
         }
-
 
 
 # -------------------------------

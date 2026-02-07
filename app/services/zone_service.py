@@ -7,6 +7,49 @@ from sqlalchemy.exc import IntegrityError
 from app.utils.geo import point_in_polygon
 from app.models.zone import Zone
 
+from app.core.search import apply_trigram_search
+
+def search_zones(
+    db: Session,
+    search: str,
+    offset: int,
+    limit: int
+):
+    query = (
+        db.query(Zone)
+        .filter(
+            Zone.is_delete == False,
+            Zone.is_active == True
+        )
+    )
+
+    # Apply trigram similarity search
+    query = apply_trigram_search(
+        query=query,
+        search=search,
+        fields=[
+            Zone.zone_name,
+            Zone.city,
+            Zone.state
+        ],
+        order_fields=[
+            Zone.zone_name,
+            Zone.city,
+            Zone.state
+        ]
+    )
+
+    total = query.count()
+
+    zones = (
+        query
+        .order_by(Zone.created_at.desc())
+        .offset(offset)
+        .limit(limit)
+        .all()
+    )
+
+    return total, zones
 
 
 # ============================================================

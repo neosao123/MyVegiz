@@ -8,6 +8,52 @@ from app.core.exceptions import AppException
 
 from sqlalchemy.sql import func
 
+from app.core.search import apply_trigram_search
+
+
+# =========================================================
+# SEARCH FUNCTIOANLITY
+# =========================================================
+def search_coupon_codes(
+    db: Session,
+    search: str,
+    offset: int,
+    limit: int
+):
+    query = (
+        db.query(CouponCode)
+        .filter(
+            CouponCode.is_delete == False
+        )
+    )
+
+    # 🔍 Search by coupon_code & coupon_type
+    query = apply_trigram_search(
+        query=query,
+        search=search,
+        fields=[
+            CouponCode.coupon_code,
+            CouponCode.coupon_type
+        ],
+        order_fields=[
+            CouponCode.coupon_code,
+            CouponCode.coupon_type
+        ]
+    )
+
+    total = query.count()
+
+    coupons = (
+        query
+        .order_by(CouponCode.created_at.desc())
+        .offset(offset)
+        .limit(limit)
+        .all()
+    )
+
+    return coupons, total
+
+
 
 # =========================================================
 # CREATE COUPON CODE

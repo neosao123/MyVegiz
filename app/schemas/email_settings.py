@@ -54,6 +54,7 @@ class EmailSettingResponse(BaseModel):
     port: int
     encryption: str
     username: str
+    password: str
     from_name: str
     from_email: EmailStr
     is_active: bool

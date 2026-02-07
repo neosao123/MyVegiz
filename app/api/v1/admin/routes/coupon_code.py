@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from app.api.dependencies import get_db, get_current_user
 from app.schemas.coupon_code import CouponCodeCreate, CouponCodeResponse,CouponCodeUpdate
 from app.schemas.response import APIResponse,PaginatedAPIResponse
-from app.services.coupon_code_service import create_coupon_code,get_coupon_codes_paginated,update_coupon_code,soft_delete_coupon_code
+from app.services.coupon_code_service import create_coupon_code,get_coupon_codes_paginated,update_coupon_code,soft_delete_coupon_code,search_coupon_codes
 from app.models.user import User
 from fastapi import Query
 import math
@@ -38,6 +38,7 @@ def create_api(
 def list_coupon_codes(
     page: int = Query(1, ge=1),
     limit: int = Query(10, ge=1),
+    q: str | None = Query(None, description="Search by coupon code or type"),
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
@@ -45,11 +46,20 @@ def list_coupon_codes(
 
         offset = (page - 1) * limit
 
-        coupons, total_records = get_coupon_codes_paginated(
-            db=db,
-            offset=offset,
-            limit=limit
-        )
+        if q:
+            coupons, total_records = search_coupon_codes(
+                db=db,
+                search=q,
+                offset=offset,
+                limit=limit
+            )
+        else:
+
+            coupons, total_records = get_coupon_codes_paginated(
+                db=db,
+                offset=offset,
+                limit=limit
+            )
 
         total_pages = math.ceil(total_records / limit) if limit else 1
 

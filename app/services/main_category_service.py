@@ -12,6 +12,45 @@ from app.models.main_category import MainCategory
 from app.schemas.main_category import MainCategoryCreate, MainCategoryUpdate
 from app.core.exceptions import AppException
 
+from app.core.search import apply_trigram_search
+
+
+def search_main_categories(
+    db: Session,
+    search: str,
+    offset: int,
+    limit: int
+):
+    query = (
+        db.query(MainCategory)
+        .filter(
+            MainCategory.is_active == True
+        )
+    )
+
+    query = apply_trigram_search(
+        query=query,
+        search=search,
+        fields=[
+            MainCategory.main_category_name
+        ],
+        order_fields=[
+            MainCategory.main_category_name
+        ]
+    )
+
+    total = query.count()
+    categories = (
+        query
+        .order_by(MainCategory.created_at.desc())
+        .offset(offset)
+        .limit(limit)
+        .all()
+    )
+
+    return total, categories
+
+
 
 MAX_IMAGE_SIZE = 1 * 1024 * 1024
 ALLOWED_TYPES = ["image/jpeg", "image/png", "image/jpg"]

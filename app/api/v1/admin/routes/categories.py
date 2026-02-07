@@ -6,7 +6,7 @@ import math
 from app.api.dependencies import get_db,get_current_user
 from app.schemas.category import CategoryCreate, CategoryResponse,CategoryUpdate,MainCategoryDropdownResponse
 from app.schemas.response import APIResponse,PaginatedAPIResponse
-from app.services.category_service import create_category,soft_delete_category,update_category,list_categories,get_main_category_dropdown
+from app.services.category_service import create_category,soft_delete_category,update_category,list_categories,get_main_category_dropdown,search_categories
 from app.models.user import User
 from app.models.category import Category
 
@@ -40,6 +40,7 @@ def add_category(
 def list_categories_api(
     page: int = Query(1, ge=1),
     limit: int = Query(10, ge=1),
+    q: str | None = Query(None, description="Search category"),
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
@@ -49,10 +50,16 @@ def list_categories_api(
         # -------------------------------
         offset = (page - 1) * limit
 
-        # -------------------------------
-        # Fetch sliders
-        # -------------------------------
-        total_records, categories = list_categories(db, offset, limit)
+        if q:
+            total_records, categories = search_categories(
+                db=db,
+                search=q,
+                offset=offset,
+                limit=limit
+            )
+        else:
+
+            total_records, categories = list_categories(db, offset, limit)
 
         total_pages = math.ceil(total_records / limit) if limit else 1
 

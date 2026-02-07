@@ -14,7 +14,7 @@ from app.models.user import User
 router = APIRouter()
 from app.schemas.response import APIResponse
 from app.schemas.zone import ZoneResponse,ZonePolygonResponse
-from app.services.zone_service import get_zones_by_lat_lng
+from app.services.zone_service import get_zones_by_lat_lng,search_zones
 from app.schemas.response import PaginatedAPIResponse
 import math
 from typing import List
@@ -39,6 +39,7 @@ def create(
 def list_zones_api(
     page: int = Query(1, ge=1),
     limit: int = Query(10, ge=1),
+    q: str | None = Query(None, description="Search zone, city or state"),
     db: Session = Depends(get_db),
     user: User = Depends(get_current_user)
 ):
@@ -48,10 +49,17 @@ def list_zones_api(
         # -------------------------------
         offset = (page - 1) * limit
 
-        # -------------------------------
-        # Fetch sliders
-        # -------------------------------
-        total_records, zones = list_zones(db, offset, limit)
+
+        if q:
+            total_records, zones = search_zones(
+                db=db,
+                search=q,
+                offset=offset,
+                limit=limit
+            )
+        else:
+
+            total_records, zones = list_zones(db, offset, limit)
 
         total_pages = math.ceil(total_records / limit) if limit else 1
 

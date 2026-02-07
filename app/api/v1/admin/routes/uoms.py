@@ -9,7 +9,8 @@ from app.services.uom_service import (
     create_uom,
     list_uoms,
     update_uom,
-    soft_delete_uom
+    soft_delete_uom,
+    search_uoms
 )
 from app.api.dependencies import get_current_user
 from app.models.user import User
@@ -45,6 +46,7 @@ def add_uom(
 def list_uoms_api(
     page: int = Query(1, ge=1),
     limit: int = Query(10, ge=1),
+    q: str | None = Query(None, description="Search UOM"),
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
@@ -54,11 +56,16 @@ def list_uoms_api(
         # -------------------------------
         offset = (page - 1) * limit
 
-        # -------------------------------
-        # Fetch sliders
-        # -------------------------------
 
-        total_records, uoms = list_uoms(db, offset, limit)
+        if q:
+            total_records, uoms = search_uoms(
+                db=db,
+                search=q,
+                offset=offset,
+                limit=limit
+            )
+        else:
+            total_records, uoms = list_uoms(db, offset, limit)
 
         total_pages = math.ceil(total_records / limit) if limit else 1
 
@@ -97,7 +104,6 @@ def list_uoms_api(
 
 
 
-
 # -------------------------------
 # update uoms uu_id wise
 # -------------------------------
@@ -114,6 +120,8 @@ def update_uom_api(
         "message": "UOM updated successfully",
         "data": result
     }
+
+
 
 # -------------------------------
 # delete uoms uu_id wise
