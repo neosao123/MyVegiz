@@ -19,10 +19,47 @@ from fastapi import UploadFile
 
 from sqlalchemy.sql import func
 import uuid
+from app.core.search import apply_trigram_search
 
 
 MAX_IMAGE_SIZE = 1 * 1024 * 1024  # 1MB
 ALLOWED_TYPES = ["image/jpeg", "image/png", "image/jpg"]
+
+
+# Search Functioanlity
+def search_users(
+    db,
+    search: str,
+    offset: int,
+    limit: int
+):
+    query = (
+        db.query(User)
+        .filter(
+            User.is_delete == False,
+            User.is_active == True
+        )
+    )
+
+    query = apply_trigram_search(
+        query=query,
+        search=search,
+        fields=[
+            User.name,
+            User.email,
+            User.contact
+        ],
+        order_fields=[
+            User.name,
+            User.email,
+            User.contact
+        ]
+    )
+
+    total = query.count()
+    products = query.offset(offset).limit(limit).all()
+
+    return total, products
 
 
 # ============================================================
@@ -123,8 +160,20 @@ def create_user(db: Session, user: UserCreate, profile_image: UploadFile = None)
 # ============================================================
 # LIST USERS
 # ============================================================
-def get_users(db: Session):
-    return db.query(User).filter(User.is_delete == False).all()
+def get_users(db: Session, offset: int, limit: int):
+    # -------------------------------
+    # Base filters (soft delete aware)
+    # -------------------------------
+    base_query = db.query(User).filter(
+            User.is_delete == False
+        ).order_by(User.created_at.desc())
+
+    
+    total_records = base_query.count()
+
+    users = base_query.offset(offset).limit(limit).all()
+
+    return total_records, users
 
 
 # ============================================================

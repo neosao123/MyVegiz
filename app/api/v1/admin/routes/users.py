@@ -5,7 +5,7 @@ from typing import List
 from app.api.dependencies import get_db,get_current_user
 from app.schemas.user import UserCreate, UserResponse,UserUpdate
 from app.schemas.response import APIResponse,PaginatedAPIResponse
-from app.services.user_service import create_user, get_users,update_user,soft_delete_user
+from app.services.user_service import create_user, get_users,update_user,soft_delete_user,search_users
 from app.models.user import User
 import math
 
@@ -35,6 +35,7 @@ def add_user(
 def list_users(
     page: int = Query(1, ge=1),
     limit: int = Query(10, ge=1),
+    q: str | None = Query(None, description="Search keyword"),
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
@@ -45,17 +46,18 @@ def list_users(
         # -------------------------------
         offset = (page - 1) * limit
 
-        # -------------------------------
-        # Base filters (soft delete aware)
-        # -------------------------------
-        base_query = db.query(User).filter(
-            User.is_delete == False
-        ).order_by(User.created_at.desc())
 
-        total_records = base_query.count()
+        if q:
+            total_records, users = search_users(
+                db=db,
+                search=q,
+                offset=offset,
+                limit=limit
+            )
+        else:
+            total_records, users = get_users(db, offset, limit)
 
-        users = base_query.offset(offset).limit(limit).all()
-
+ 
 
         # -------------------------------
         # Pagination info
@@ -87,7 +89,7 @@ def list_users(
             "pagination": pagination
         }
 
-    except Exception as e:
+    except Exception:
         return {
             "status": 500,
             "message": "Failed to fetch users",
