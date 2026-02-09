@@ -11,6 +11,7 @@ from datetime import datetime
 class VariantItem(BaseModel):
     zone_id: int
     uom_id: int
+    quantity: int
     actual_price: float
     selling_price: float
     is_deliverable: Optional[bool] = True
@@ -42,6 +43,8 @@ class ProductVariantResponse(BaseModel):
 
     uom_id: int
     uom_name: str | None = None
+
+    quantity: int 
 
     actual_price: float
     selling_price: float

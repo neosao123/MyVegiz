@@ -93,6 +93,16 @@ def bulk_create_product_variants(
     variants_to_create = []
 
     for item in data.variants:
+
+        # -------------------------------
+        # VALIDATE QUANTITY
+        # -------------------------------
+        if item.quantity is None or item.quantity <= 0:
+            raise AppException(
+                status=400,
+                message="Quantity must be greater than 0"
+            )
+    
         # -------------------------------
         # Validate Zone
         # -------------------------------
@@ -139,6 +149,7 @@ def bulk_create_product_variants(
                 product_id=data.product_id,
                 zone_id=item.zone_id,
                 uom_id=item.uom_id,
+                quantity=item.quantity,
                 actual_price=item.actual_price,
                 selling_price=item.selling_price,
                 is_deliverable=item.is_deliverable if item.is_deliverable is not None else True,
@@ -202,6 +213,14 @@ def update_product_variant(
 
     if not variant:
         raise AppException(status=404, message="Variant not found")
+    
+    if "quantity" in data:
+        if data["quantity"] is None or data["quantity"] <= 0:
+            raise AppException(
+                status=400,
+                message="Quantity must be greater than 0"
+            )
+        variant.quantity = data["quantity"]
 
     if "actual_price" in data:
         variant.actual_price = data["actual_price"]

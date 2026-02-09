@@ -31,6 +31,8 @@ class ProductVariants(Base):
     actual_price = Column(Float, nullable=False)
     selling_price = Column(Float, nullable=False, index=True)
 
+    quantity = Column(Integer, nullable=True)
+
     is_deliverable=Column(Boolean, default=True)
 
     is_active = Column(Boolean, default=True)

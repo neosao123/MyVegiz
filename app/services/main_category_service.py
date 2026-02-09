@@ -23,9 +23,9 @@ def search_main_categories(
 ):
     query = (
         db.query(MainCategory)
-        .filter(
-            MainCategory.is_active == True
-        )
+        # .filter(
+        #     MainCategory.is_delete == False
+        # )
     )
 
     query = apply_trigram_search(
@@ -40,6 +40,7 @@ def search_main_categories(
     )
 
     total = query.count()
+
     categories = (
         query
         .order_by(MainCategory.created_at.desc())
@@ -123,7 +124,7 @@ def list_main_categories(db: Session, offset: int, limit: int):
     # Base filters (soft delete aware)
     # -------------------------------
     base_query = db.query(MainCategory).filter(
-        # MainCategory.is_active == True
+        # MainCategory.is_delete == False
     ).order_by(MainCategory.created_at.desc())
 
     total_records = base_query.count()

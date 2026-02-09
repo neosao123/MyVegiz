@@ -18,8 +18,7 @@ def search_zones(
     query = (
         db.query(Zone)
         .filter(
-            Zone.is_delete == False,
-            Zone.is_active == True
+            Zone.is_delete == False
         )
     )
 
@@ -112,8 +111,7 @@ def list_zones(db: Session, offset: int, limit: int):
     # Base filters (soft delete aware)
     # -------------------------------
     base_query = db.query(Zone).filter(
-        Zone.is_delete == False,
-        Zone.is_active == True
+        Zone.is_delete == False
     ).order_by(Zone.created_at.desc())
 
     total_records = base_query.count()

@@ -10,6 +10,7 @@ from app.schemas.user import UserUpdate
 from fastapi import UploadFile
 
 
+
 # Business Logic
 # Keep logic OUT of routes
 
@@ -28,7 +29,7 @@ ALLOWED_TYPES = ["image/jpeg", "image/png", "image/jpg"]
 
 # Search Functioanlity
 def search_users(
-    db,
+    db: Session,
     search: str,
     offset: int,
     limit: int
@@ -36,7 +37,6 @@ def search_users(
     query = (
         db.query(User)
         .filter(
-            User.is_delete == False,
             User.is_active == True
         )
     )
@@ -57,7 +57,13 @@ def search_users(
     )
 
     total = query.count()
-    products = query.offset(offset).limit(limit).all()
+    products = (
+        query
+        .order_by(User.created_at.desc())
+        .offset(offset)
+        .limit(limit)
+        .all()
+    )
 
     return total, products
 

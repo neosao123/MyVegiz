@@ -30,8 +30,8 @@ def search_products(
         .join(Category)
         .outerjoin(SubCategory)
         .filter(
-            Product.is_delete == False,
-            Product.is_active == True
+            Product.is_delete == False
+            # Product.is_active == True
         )
         .options(
             joinedload(Product.images),
@@ -181,7 +181,7 @@ def list_products(db: Session, offset: int, limit: int):
     # Base filters (soft delete aware)
     # -------------------------------
     base_query = db.query(Product).filter(
-        Product.is_delete == False,
+        Product.is_delete == False
         # Product.is_active == True
     ).order_by(Product.created_at.desc())
 

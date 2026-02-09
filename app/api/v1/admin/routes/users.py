@@ -35,7 +35,7 @@ def add_user(
 def list_users(
     page: int = Query(1, ge=1),
     limit: int = Query(10, ge=1),
-    q: str | None = Query(None, description="Search keyword"),
+    q: str | None = Query(None, description="Search User"),
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):

@@ -20,7 +20,6 @@ def search_sliders(
 ):
     query = db.query(Slider).filter(
         Slider.is_delete == False,
-        Slider.is_active == True,
         Slider.caption.ilike(f"%{search}%")
     )
 
@@ -102,8 +101,8 @@ def list_sliders(db: Session, offset: int, limit: int):
     # Base filters (soft delete aware)
     # -------------------------------
     base_query = db.query(Slider).filter(
-        Slider.is_delete == False,
-        Slider.is_active == True
+        Slider.is_delete == False
+        # Slider.is_active == True
     ).order_by(Slider.created_at.desc())
 
     total_records = base_query.count()

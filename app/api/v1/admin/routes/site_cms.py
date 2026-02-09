@@ -15,7 +15,11 @@ from app.schemas.site_cms import (
 
 router = APIRouter(tags=["Site CMS"])
 
-
+# -------------------------------
+# list SITECMS(terms, privacy, refund) 
+# -------------------------------
+# # Get CMS content based on page key (terms, privacy, refund)
+# Requires authenticated user
 @router.get("/{page_key}", response_model=APIResponse[SiteCMSResponse])
 def get_cms(
     page_key: str,
@@ -30,6 +34,11 @@ def get_cms(
     }
 
 
+# -------------------------------
+# create/update SITECMS(terms, privacy, refund)  
+# -------------------------------
+# Create or update CMS content based on page key
+# Accepts form data and requires authenticated user
 @router.post("/{page_key}", response_model=APIResponse[SiteCMSResponse])
 def save_cms(
     page_key: str,

@@ -4,6 +4,9 @@ from typing import Optional
 from datetime import datetime
 
 
+# -------------------------
+# SiteCMS Create/Update
+# -------------------------
 class SiteCMSForm(BaseModel):
     meta_title: str
     subtitle: str
@@ -37,6 +40,10 @@ class SiteCMSForm(BaseModel):
         return v
     
 
+
+# -------------------------
+# SiteCMS RESPONSE
+# -------------------------
 class SiteCMSResponse(BaseModel):
     id: int
     page_key: str

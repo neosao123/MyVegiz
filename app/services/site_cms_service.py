@@ -3,9 +3,12 @@ from sqlalchemy.sql import func
 from app.models.site_cms import SiteCMS
 from app.core.exceptions import AppException
 
+# Allowed CMS page keys
 VALID_KEYS = ["terms", "privacy", "refund"]
 
-
+# =========================================================
+# Fetch CMS content by page key (terms, privacy, refund)
+# =========================================================
 def get_cms_by_key(db: Session, page_key: str):
     if page_key not in VALID_KEYS:
         raise AppException(400, "Invalid page key")
@@ -16,6 +19,12 @@ def get_cms_by_key(db: Session, page_key: str):
     ).first()
 
 
+# =========================================================
+# Create/Update CMS
+# =========================================================
+# Create a new CMS record or update existing one based on page_key
+# If record exists → update fields
+# If record does not exist → create new entry
 def create_or_update_cms(
     db: Session,
     page_key: str,
